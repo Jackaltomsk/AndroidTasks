@@ -8,10 +8,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class StopwatchActivity extends AppCompatActivity {
-
-    private int currentStopwatchTitle;
-    private final String CURRENT_STOPWATCH_STATE = "CURRENT_STOPWATCH_STATE";
-    MenuItem startStopItem;
+    private int mCurrentStopwatchTitle;
+    private static String sCurrentStopwatchState = "CURRENT_STOPWATCH_STATE";
+    private MenuItem mStartStopItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,8 +18,7 @@ public class StopwatchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_stopwatch);
 
         if (savedInstanceState == null) {
-            currentStopwatchTitle = R.string.menu_start_counter_title;
-
+            mCurrentStopwatchTitle = R.string.menu_start_counter_title;
             // Добавление фрагмента в разметку окна, если запуск - первый.
             FragmentManager manager = getFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
@@ -28,7 +26,7 @@ public class StopwatchActivity extends AppCompatActivity {
             transaction.add(R.id.stopwatch_fragment_container, timeFragment);
             transaction.commit();
         }
-        else currentStopwatchTitle = savedInstanceState.getInt(CURRENT_STOPWATCH_STATE);
+        else mCurrentStopwatchTitle = savedInstanceState.getInt(sCurrentStopwatchState);
     }
 
     @Override
@@ -36,8 +34,11 @@ public class StopwatchActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_stopwatch, menu);
         // Установка названия действия в соответсвии с текущим статусом таймера.
-        startStopItem = menu.findItem(R.id.start_counter);
-        startStopItem.setTitle(currentStopwatchTitle);
+        mStartStopItem = menu.findItem(R.id.start_counter);
+        if (mStartStopItem == null) {
+            throw new NullPointerException("Не найден пункт меню 'Запустить'");
+        }
+        mStartStopItem.setTitle(mCurrentStopwatchTitle);
         return true;
     }
 
@@ -47,35 +48,36 @@ public class StopwatchActivity extends AppCompatActivity {
         // Вся логика пока завязана на один фрагмент, так что его и получаем.
         TimeFragment timeFragment = (TimeFragment)getFragmentManager()
                 .findFragmentById(R.id.stopwatch_fragment_container);
+        if (timeFragment == null) {
+            throw new NullPointerException("Не найден фрагмент с хронометром.");
+        }
 
         switch (id) {
             case R.id.start_counter:
                 String titleName = item.getTitle().toString();
-
                 if (titleName.equals(getResources().getString(R.string.menu_start_counter_title))) {
-                    currentStopwatchTitle = R.string.menu_stop_counter_title;
+                    mCurrentStopwatchTitle = R.string.menu_stop_counter_title;
                     timeFragment.startTimer();
                 }
                 else {
-                    currentStopwatchTitle = R.string.menu_start_counter_title;
+                    mCurrentStopwatchTitle = R.string.menu_start_counter_title;
                     timeFragment.stopTimer();
                 }
-                item.setTitle(currentStopwatchTitle);
+                item.setTitle(mCurrentStopwatchTitle);
                 break;
             case R.id.drop_counter:
                 timeFragment.stopTimer();
                 timeFragment.resetTimer();
-                currentStopwatchTitle = R.string.menu_start_counter_title;
-                startStopItem.setTitle(currentStopwatchTitle);
+                mCurrentStopwatchTitle = R.string.menu_start_counter_title;
+                mStartStopItem.setTitle(mCurrentStopwatchTitle);
                 break;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(CURRENT_STOPWATCH_STATE, currentStopwatchTitle);
+        outState.putInt(sCurrentStopwatchState, mCurrentStopwatchTitle);
     }
 }
