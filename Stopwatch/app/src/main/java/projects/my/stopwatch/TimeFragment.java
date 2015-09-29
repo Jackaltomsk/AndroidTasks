@@ -1,6 +1,5 @@
 package projects.my.stopwatch;
 
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.SystemClock;
@@ -10,11 +9,19 @@ import android.view.ViewGroup;
 import android.widget.Chronometer;
 
 public class TimeFragment extends Fragment {
-    private long mCurrentTime;
-    private static String sCurrentTimeKey = "CURRENT_TIME_KEY";
-    private boolean mIsRunning;
-    private static String sIsRunning = "IS_RUNNING";
-    private Chronometer mChronometer;
+    private long currentTime;
+    private static final String CURRENT_TIME_KEY = "CURRENT_TIME_KEY";
+    private boolean isRunning;
+    private static final String IS_RUNNING = "IS_RUNNING";
+    private Chronometer chronometer;
+    private ChronometerState activity;
+
+    /**
+     * Интерфейс оповещения о смене состояния хронометра.
+     */
+    public interface ChronometerState {
+        public void stateChanged(boolean isRunning);
+    }
 
     public TimeFragment() {
         // Required empty public constructor
@@ -23,42 +30,62 @@ public class TimeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            activity = (ChronometerState)getActivity();
+        }
+        catch (ClassCastException ex) {
+            throw new ClassCastException(activity.toString() +
+                    " должен реализовывать OnArticleSelectedListener");
+        }
 
         if (savedInstanceState != null) {
-            mCurrentTime = savedInstanceState.getLong(sCurrentTimeKey);
-            mIsRunning = savedInstanceState.getBoolean(sIsRunning);
+            currentTime = savedInstanceState.getLong(CURRENT_TIME_KEY);
+            //setIsRunning(savedInstanceState.getBoolean(IS_RUNNING));
+            isRunning = savedInstanceState.getBoolean(IS_RUNNING);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        int orientation = getResources().getConfiguration().orientation;
-        int viewId = orientation == Configuration.ORIENTATION_PORTRAIT ?
-                R.id.chronometer_portrait : R.id.chronometer_landscape;
         View view = inflater.inflate(R.layout.time_fragment, container, false);
-        mChronometer = (Chronometer)view.findViewById(viewId);
-
-        if (mIsRunning) startTimer();
-        else mChronometer.setBase(Time.calculateElapsed(mCurrentTime));
+        chronometer = (Chronometer)view.findViewById(R.id.chronometer);
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        if (isRunning) startTimer();
+        else {
+            chronometer.setBase(Time.calculateElapsed(currentTime));
+            activity.stateChanged(false);
+        }
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState){
         super.onSaveInstanceState(outState);
         internalStopTimer();
-        outState.putLong(sCurrentTimeKey, mCurrentTime);
-        outState.putBoolean(sIsRunning, mIsRunning);
+        outState.putLong(CURRENT_TIME_KEY, currentTime);
+        outState.putBoolean(IS_RUNNING, isRunning);
+    }
+
+    public boolean getIsRunning() {
+        return isRunning;
+    }
+
+    private void setIsRunning(boolean flag) {
+        isRunning = flag;
+        activity.stateChanged(isRunning);
     }
 
     /**
      * Реализует старт таймера.
      */
     public void startTimer() {
-        mChronometer.setBase(Time.calculateElapsed(mCurrentTime));
-        mChronometer.start();
-        mIsRunning = true;
+        chronometer.setBase(Time.calculateElapsed(currentTime));
+        chronometer.start();
+        setIsRunning(true);
     }
 
     /**
@@ -66,21 +93,21 @@ public class TimeFragment extends Fragment {
      */
     public void stopTimer() {
         internalStopTimer();
-        mIsRunning = false;
+        setIsRunning(false);
     }
 
     /**
      * Реализует сброс таймера.
      */
     public void resetTimer() {
-        mChronometer.setBase(SystemClock.elapsedRealtime());
-        mCurrentTime = 0;
+        chronometer.setBase(SystemClock.elapsedRealtime());
+        currentTime = 0;
     }
     /**
      * Реализует останов таймера без изменения флага работы.
      */
     private void internalStopTimer() {
-        mChronometer.stop();
-        if (mIsRunning) mCurrentTime = Time.calculateElapsed(mChronometer.getBase());
+        chronometer.stop();
+        if (isRunning) currentTime = Time.calculateElapsed(chronometer.getBase());
     }
 }

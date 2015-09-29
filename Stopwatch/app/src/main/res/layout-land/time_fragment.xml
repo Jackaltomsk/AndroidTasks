@@ -7,8 +7,8 @@
     <Chronometer
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/chronometer_landscape"
+        android:id="@+id/chronometer"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:textSize="@dimen/stopwatch_size_landscape" />
+        android:textSize="@dimen/stopwatch_size" />
 </RelativeLayout>

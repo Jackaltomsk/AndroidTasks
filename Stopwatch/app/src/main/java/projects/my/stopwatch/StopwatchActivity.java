@@ -7,10 +7,8 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class StopwatchActivity extends AppCompatActivity {
-    private int mCurrentStopwatchTitle;
-    private static String sCurrentStopwatchState = "CURRENT_STOPWATCH_STATE";
-    private MenuItem mStartStopItem;
+public class StopwatchActivity extends AppCompatActivity implements TimeFragment.ChronometerState {
+    private MenuItem startStopItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,7 +16,6 @@ public class StopwatchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_stopwatch);
 
         if (savedInstanceState == null) {
-            mCurrentStopwatchTitle = R.string.menu_start_counter_title;
             // Добавление фрагмента в разметку окна, если запуск - первый.
             FragmentManager manager = getFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
@@ -26,7 +23,6 @@ public class StopwatchActivity extends AppCompatActivity {
             transaction.add(R.id.stopwatch_fragment_container, timeFragment);
             transaction.commit();
         }
-        else mCurrentStopwatchTitle = savedInstanceState.getInt(sCurrentStopwatchState);
     }
 
     @Override
@@ -34,11 +30,10 @@ public class StopwatchActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_stopwatch, menu);
         // Установка названия действия в соответсвии с текущим статусом таймера.
-        mStartStopItem = menu.findItem(R.id.start_counter);
-        if (mStartStopItem == null) {
+        startStopItem = menu.findItem(R.id.start_counter);
+        if (startStopItem == null) {
             throw new NullPointerException("Не найден пункт меню 'Запустить'");
         }
-        mStartStopItem.setTitle(mCurrentStopwatchTitle);
         return true;
     }
 
@@ -54,22 +49,12 @@ public class StopwatchActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.start_counter:
-                String titleName = item.getTitle().toString();
-                if (titleName.equals(getResources().getString(R.string.menu_start_counter_title))) {
-                    mCurrentStopwatchTitle = R.string.menu_stop_counter_title;
-                    timeFragment.startTimer();
-                }
-                else {
-                    mCurrentStopwatchTitle = R.string.menu_start_counter_title;
-                    timeFragment.stopTimer();
-                }
-                item.setTitle(mCurrentStopwatchTitle);
+                if (!timeFragment.getIsRunning()) timeFragment.startTimer();
+                else timeFragment.stopTimer();
                 break;
             case R.id.drop_counter:
                 timeFragment.stopTimer();
                 timeFragment.resetTimer();
-                mCurrentStopwatchTitle = R.string.menu_start_counter_title;
-                mStartStopItem.setTitle(mCurrentStopwatchTitle);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -78,6 +63,14 @@ public class StopwatchActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(sCurrentStopwatchState, mCurrentStopwatchTitle);
+    }
+
+    @Override
+    public void stateChanged(boolean isRunning) throws NullPointerException {
+        if (startStopItem == null) throw new NullPointerException("Попытка вызвать изменение " +
+                "заголовка кнопки меню до ее инициализации.");
+
+        startStopItem.setTitle(isRunning ?
+                R.string.menu_stop_counter_title : R.string.menu_start_counter_title);
     }
 }
