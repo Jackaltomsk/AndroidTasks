@@ -40,8 +40,7 @@ public class TimeFragment extends Fragment {
 
         if (savedInstanceState != null) {
             currentTime = savedInstanceState.getLong(CURRENT_TIME_KEY);
-            //setIsRunning(savedInstanceState.getBoolean(IS_RUNNING));
-            isRunning = savedInstanceState.getBoolean(IS_RUNNING);
+            setIsRunning(savedInstanceState.getBoolean(IS_RUNNING));
         }
     }
 
@@ -54,7 +53,8 @@ public class TimeFragment extends Fragment {
     }
 
     @Override
-    public void onStart() {
+    public void onResume() {
+        super.onResume();
         if (isRunning) startTimer();
         else {
             chronometer.setBase(Time.calculateElapsed(currentTime));
@@ -65,9 +65,15 @@ public class TimeFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState){
         super.onSaveInstanceState(outState);
-        internalStopTimer();
+        if (isRunning) currentTime = Time.calculateElapsed(chronometer.getBase());
         outState.putLong(CURRENT_TIME_KEY, currentTime);
         outState.putBoolean(IS_RUNNING, isRunning);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        internalStopTimer();
     }
 
     public boolean getIsRunning() {
@@ -83,7 +89,15 @@ public class TimeFragment extends Fragment {
      * Реализует старт таймера.
      */
     public void startTimer() {
-        chronometer.setBase(Time.calculateElapsed(currentTime));
+        // Когда хронометр работал в фоне.
+        if (Time.calculateElapsed(chronometer.getBase()) > currentTime) {
+            currentTime = Time.calculateElapsed(chronometer.getBase());
+        }
+        else {
+            chronometer.setBase(Time.calculateElapsed(currentTime));
+            //chronometer.start();
+            //setIsRunning(true);
+        }
         chronometer.start();
         setIsRunning(true);
     }

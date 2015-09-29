@@ -9,6 +9,7 @@ import android.view.MenuItem;
 
 public class StopwatchActivity extends AppCompatActivity implements TimeFragment.ChronometerState {
     private MenuItem startStopItem;
+    private boolean isChronoRunning;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,7 @@ public class StopwatchActivity extends AppCompatActivity implements TimeFragment
         if (startStopItem == null) {
             throw new NullPointerException("Не найден пункт меню 'Запустить'");
         }
+        stateChanged(isChronoRunning);
         return true;
     }
 
@@ -66,11 +68,12 @@ public class StopwatchActivity extends AppCompatActivity implements TimeFragment
     }
 
     @Override
-    public void stateChanged(boolean isRunning) throws NullPointerException {
-        if (startStopItem == null) throw new NullPointerException("Попытка вызвать изменение " +
-                "заголовка кнопки меню до ее инициализации.");
-
-        startStopItem.setTitle(isRunning ?
-                R.string.menu_stop_counter_title : R.string.menu_start_counter_title);
+    public void stateChanged(boolean isRunning) {
+        // В момент вызова метода меню еще может быть неинициализировано.
+        if (startStopItem == null) isChronoRunning = isRunning;
+        else {
+            startStopItem.setTitle(isRunning ?
+                    R.string.menu_stop_counter_title : R.string.menu_start_counter_title);
+        }
     }
 }
