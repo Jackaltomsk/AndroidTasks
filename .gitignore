@@ -25,4 +25,4 @@ proguard/
 
 # Log Files
 *.log
-Stopwatch/.idea/
+Stopwatch/.idea/gradle.xml

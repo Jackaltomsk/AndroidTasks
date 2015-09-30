@@ -55,7 +55,6 @@ public class StopwatchActivity extends AppCompatActivity implements TimeFragment
                 else timeFragment.stopTimer();
                 break;
             case R.id.drop_counter:
-                timeFragment.stopTimer();
                 timeFragment.resetTimer();
                 break;
         }
