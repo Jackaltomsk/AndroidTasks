@@ -2,6 +2,9 @@ package projects.my.stopwatch;
 
 import android.os.SystemClock;
 
+import java.text.DateFormat;
+import java.util.Date;
+
 /**
  * Содержит в себе методы работы со временем.
  */

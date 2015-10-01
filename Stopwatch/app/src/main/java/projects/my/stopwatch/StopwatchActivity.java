@@ -10,6 +10,7 @@ import android.view.MenuItem;
 public class StopwatchActivity extends AppCompatActivity implements TimeFragment.ChronometerState {
     private MenuItem startStopItem;
     private boolean isChronoRunning;
+    private TimeFragment timeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +21,7 @@ public class StopwatchActivity extends AppCompatActivity implements TimeFragment
             // Добавление фрагмента в разметку окна, если запуск - первый.
             FragmentManager manager = getFragmentManager();
             FragmentTransaction transaction = manager.beginTransaction();
-            TimeFragment timeFragment = new TimeFragment();
+            timeFragment = new TimeFragment();
             transaction.add(R.id.stopwatch_fragment_container, timeFragment);
             transaction.commit();
         }
@@ -42,12 +43,6 @@ public class StopwatchActivity extends AppCompatActivity implements TimeFragment
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        // Вся логика пока завязана на один фрагмент, так что его и получаем.
-        TimeFragment timeFragment = (TimeFragment)getFragmentManager()
-                .findFragmentById(R.id.stopwatch_fragment_container);
-        if (timeFragment == null) {
-            throw new NullPointerException("Не найден фрагмент с хронометром.");
-        }
 
         switch (id) {
             case R.id.start_counter:
