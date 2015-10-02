@@ -1,9 +1,6 @@
-package projects.my.stopwatch;
+package projects.my.stopwatch.common;
 
 import android.os.SystemClock;
-
-import java.text.DateFormat;
-import java.util.Date;
 
 /**
  * Содержит в себе методы работы со временем.
@@ -14,7 +11,7 @@ public class Time {
      * @param since Время, вычитаемое из текущего.
      * @return Возвращает разность времени.
      */
-    static long calculateElapsed(long since) {
+    public static long calculateElapsed(long since) {
         return SystemClock.elapsedRealtime() - since;
     }
 }

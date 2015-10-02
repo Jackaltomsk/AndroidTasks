@@ -2,58 +2,69 @@ package projects.my.stopwatch;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
 
-public class StopwatchActivity extends AppCompatActivity implements TimeFragment.ChronometerState {
-    private MenuItem startStopItem;
-    private boolean isChronoRunning;
+import projects.my.stopwatch.fragments.TimeFragment;
+
+public class StopwatchActivity extends AppCompatActivity {
     private TimeFragment timeFragment;
+    private ServiceConnection chronoConnection;
+    private ChronoService chronoService;
+    private boolean bound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stopwatch);
 
+        chronoConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                ChronoService.ChronoBinder binder = (ChronoService.ChronoBinder) service;
+                chronoService = binder.getService();
+                chronoService.createNotificationInfrastructure(StopwatchActivity.this);
+                timeFragment.handleConnected(chronoService);
+                bound = true;
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName arg0) {
+                bound = false;
+            }
+        };
+
+        Intent intent = new Intent(this, ChronoService.class);
+        bindService(intent, chronoConnection, BIND_AUTO_CREATE);
+
+        FragmentManager manager = getFragmentManager();
         if (savedInstanceState == null) {
-            // Добавление фрагмента в разметку окна, если запуск - первый.
-            FragmentManager manager = getFragmentManager();
+            // Добавление фрагмента в разметку окна, если пересоздается активити.
             FragmentTransaction transaction = manager.beginTransaction();
             timeFragment = new TimeFragment();
             transaction.add(R.id.stopwatch_fragment_container, timeFragment);
             transaction.commit();
         }
+        else {
+            timeFragment = (TimeFragment) manager.findFragmentById(
+                    R.id.stopwatch_fragment_container);
+        }
+    }
+
+    public interface ChronoConnectedListener {
+        public void handleConnected(ChronoService service);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_stopwatch, menu);
-        // Установка названия действия в соответсвии с текущим статусом таймера.
-        startStopItem = menu.findItem(R.id.start_counter);
-        if (startStopItem == null) {
-            throw new NullPointerException("Не найден пункт меню 'Запустить'");
+    public void onDestroy() {
+        super.onDestroy();
+        if (bound) {
+            unbindService(chronoConnection);
         }
-        stateChanged(isChronoRunning);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        switch (id) {
-            case R.id.start_counter:
-                if (!timeFragment.getIsRunning()) timeFragment.startTimer();
-                else timeFragment.stopTimer();
-                break;
-            case R.id.drop_counter:
-                timeFragment.resetTimer();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -61,13 +72,7 @@ public class StopwatchActivity extends AppCompatActivity implements TimeFragment
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public void stateChanged(boolean isRunning) {
-        // В момент вызова метода меню еще может быть неинициализировано.
-        if (startStopItem == null) isChronoRunning = isRunning;
-        else {
-            startStopItem.setTitle(isRunning ?
-                    R.string.menu_stop_counter_title : R.string.menu_start_counter_title);
-        }
+    public ChronoService getChronoService() {
+        return chronoService;
     }
 }

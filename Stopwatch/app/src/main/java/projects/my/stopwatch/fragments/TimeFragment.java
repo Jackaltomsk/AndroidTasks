@@ -1,39 +1,30 @@
-package projects.my.stopwatch;
+package projects.my.stopwatch.fragments;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.SystemClock;
-import android.text.format.DateUtils;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Chronometer;
 
-public class TimeFragment extends Fragment {
+import projects.my.stopwatch.ChronoService;
+import projects.my.stopwatch.R;
+import projects.my.stopwatch.StopwatchActivity;
+import projects.my.stopwatch.common.Time;
+
+public class TimeFragment extends Fragment
+    implements StopwatchActivity.ChronoConnectedListener {
     private long currentTime;
     private static final String CURRENT_TIME_KEY = "CURRENT_TIME_KEY";
     private boolean isRunning;
     private static final String IS_RUNNING = "IS_RUNNING";
     private Chronometer chronometer;
-    private ChronometerState activity;
-    private Chronometer.OnChronometerTickListener tickListener;
-
-    // Инфраструктура оповещений.
-    private static final int ntfId = 1;
-    private Notification.Builder ntfBuilder;
-    private NotificationManager ntfManager;
-
-    /**
-     * Интерфейс оповещения о смене состояния хронометра.
-     */
-    public interface ChronometerState {
-        public void stateChanged(boolean isRunning);
-    }
+    private StopwatchActivity activity;
+    private MenuItem startStopItem;
 
     public TimeFragment() {
         // Required empty public constructor
@@ -42,15 +33,8 @@ public class TimeFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        createNotificationInfrastructure();
-
-        try {
-            activity = (ChronometerState)getActivity();
-        }
-        catch (ClassCastException ex) {
-            throw new ClassCastException(activity.toString() +
-                    " должен реализовывать OnArticleSelectedListener");
-        }
+        activity = (StopwatchActivity) getActivity();
+        setHasOptionsMenu(true);
 
         if (savedInstanceState != null) {
             currentTime = savedInstanceState.getLong(CURRENT_TIME_KEY);
@@ -67,12 +51,40 @@ public class TimeFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_stopwatch, menu);
+        // Установка названия действия в соответсвии с текущим статусом таймера.
+        startStopItem = menu.findItem(R.id.start_counter);
+        if (startStopItem == null) {
+            throw new NullPointerException("Не найден пункт меню 'Запустить'");
+        }
+        stateChanged();
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.start_counter:
+                if (!isRunning) startTimer();
+                else stopTimer();
+                break;
+            case R.id.drop_counter:
+                resetTimer();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
         if (isRunning) startTimer();
         else {
             chronometer.setBase(Time.calculateElapsed(currentTime));
-            activity.stateChanged(false);
+            stateChanged();
         }
     }
 
@@ -88,11 +100,7 @@ public class TimeFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         internalStopTimer();
-        ntfManager.cancel(ntfId);
-    }
-
-    public boolean getIsRunning() {
-        return isRunning;
+        activity.getChronoService().stopNotify(true);
     }
 
     /**
@@ -101,15 +109,18 @@ public class TimeFragment extends Fragment {
     public void startTimer() {
         // Запущен в двух случаях: 1) изменилась ориентация экрана; 2) вернули фокус на активити.
         if (isRunning) {
-            // Если вернули фокус, то времени в таймере пройдет больше, чем сохранено.
+            // Если вернули фокус, то времени прошло больше, чем сохранено.
             if (Time.calculateElapsed(chronometer.getBase()) > currentTime) {
                 currentTime = Time.calculateElapsed(chronometer.getBase());
             }
         }
-        chronometer.setOnChronometerTickListener(tickListener);
         chronometer.setBase(Time.calculateElapsed(currentTime));
         chronometer.start();
         setIsRunning(true);
+
+        if (activity.getChronoService() != null) {
+            activity.getChronoService().startNotify(currentTime, true);
+        }
     }
 
     /**
@@ -118,6 +129,7 @@ public class TimeFragment extends Fragment {
     public void stopTimer() {
         internalStopTimer();
         setIsRunning(false);
+        activity.getChronoService().stopNotify(false);
     }
 
     /**
@@ -129,13 +141,18 @@ public class TimeFragment extends Fragment {
         currentTime = 0;
     }
 
+    @Override
+    public void handleConnected(ChronoService service) {
+        if (isRunning) startTimer();
+    }
+
     /**
      * Реализует установку флага запуска таймера и оповещение активити о смене статуса.
      * @param flag
      */
     private void setIsRunning(boolean flag) {
         isRunning = flag;
-        activity.stateChanged(isRunning);
+        stateChanged();
     }
 
     /**
@@ -146,29 +163,10 @@ public class TimeFragment extends Fragment {
         if (isRunning) currentTime = Time.calculateElapsed(chronometer.getBase());
     }
 
-    private void createNotificationInfrastructure() {
-        ntfManager = (NotificationManager)getActivity()
-                .getSystemService(Context.NOTIFICATION_SERVICE);
-        Intent activityIntent = new Intent(getActivity(), getActivity().getClass());
-        PendingIntent intent = PendingIntent.getActivity(getActivity(), 0, activityIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-
-        ntfBuilder = new Notification.Builder(getActivity())
-                .setSmallIcon(R.drawable.timer)
-                .setContentTitle(getResources().getString(R.string.chronometer_notification_title))
-                .setContentIntent(intent)
-                .setPriority(Notification.PRIORITY_HIGH);
-
-        tickListener = new Chronometer.OnChronometerTickListener() {
-            @Override
-            public void onChronometerTick(Chronometer chronometer) {
-                Notification ntf = ntfBuilder
-                        .setContentText(chronometer.getText())
-                        .build();
-                ntf.flags |= Notification.FLAG_NO_CLEAR;
-                ntf.category = Notification.CATEGORY_ALARM;
-                ntfManager.notify(ntfId, ntf);
-            }
-        };
+    private void stateChanged() {
+        if (startStopItem != null) {
+            startStopItem.setTitle(isRunning ?
+                    R.string.menu_stop_counter_title : R.string.menu_start_counter_title);
+        }
     }
 }
