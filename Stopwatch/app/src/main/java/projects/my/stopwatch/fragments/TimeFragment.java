@@ -3,6 +3,7 @@ package projects.my.stopwatch.fragments;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.SystemClock;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,6 +48,11 @@ public class TimeFragment extends Fragment
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.time_fragment, container, false);
         chronometer = (Chronometer)view.findViewById(R.id.chronometer);
+
+        // Установка тулбара.
+        Toolbar toolbar = (Toolbar) activity.findViewById(R.id.toolbar);
+        activity.setSupportActionBar(toolbar);
+
         return view;
     }
 
