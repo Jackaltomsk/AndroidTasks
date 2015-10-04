@@ -87,7 +87,7 @@ public class ChronoService extends Service {
                                 DateUtils.formatElapsedTime(threadTime))
                                 .build();
                         ntf.flags |= Notification.FLAG_NO_CLEAR;
-                        ntf.category = Notification.CATEGORY_ALARM;
+                        //ntf.category = Notification.CATEGORY_ALARM;
                         ntfManager.notify(ntfId, ntf);
                         try {
                             Thread.sleep(oneSecond);

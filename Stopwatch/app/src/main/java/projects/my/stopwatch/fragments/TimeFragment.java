@@ -33,6 +33,8 @@ public class TimeFragment extends Fragment
     private static final String CURRENT_TIME_KEY = "CURRENT_TIME_KEY";
     private boolean isRunning;
     private static final String IS_RUNNING = "IS_RUNNING";
+    private int backgroundColor;
+    private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private Chronometer chronometer;
     private ChronoService service;
     private MenuItem startStopItem;
@@ -47,8 +49,14 @@ public class TimeFragment extends Fragment
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
+        TypedArray typedArray = getActivity().getTheme().
+                obtainStyledAttributes(new int[]{android.R.attr.background});
+        backgroundColor = typedArray.getColor(0, 0xFF00FF);
+        typedArray.recycle();
+
         if (savedInstanceState != null) {
             currentTime = savedInstanceState.getLong(CURRENT_TIME_KEY);
+            backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
             setIsRunning(savedInstanceState.getBoolean(IS_RUNNING));
         }
     }
@@ -68,6 +76,11 @@ public class TimeFragment extends Fragment
         // Установка тулбара.
         Toolbar toolbar = (Toolbar) activity.findViewById(R.id.toolbar);
         activity.setSupportActionBar(toolbar);
+
+        if (backgroundColor != 0) {
+            View fragmentView = getActivity().findViewById(R.id.stopwatch_fragment_container);
+            fragmentView.setBackground(new ColorDrawable(backgroundColor));
+        }
 
         return view;
     }
@@ -132,6 +145,7 @@ public class TimeFragment extends Fragment
         if (isRunning) currentTime = Time.calculateElapsed(chronometer.getBase());
         outState.putLong(CURRENT_TIME_KEY, currentTime);
         outState.putBoolean(IS_RUNNING, isRunning);
+        outState.putInt(BACKGROUND_COLOR, backgroundColor);
     }
 
     @Override
@@ -221,15 +235,19 @@ public class TimeFragment extends Fragment
 
         // Если фон еще не менялся.
         if (bc == null) {
-            TypedArray typedArray = getActivity().getTheme().obtainStyledAttributes(new int[]{android.R.attr.background});
+            TypedArray typedArray = getActivity().getTheme()
+                    .obtainStyledAttributes(new int[]{android.R.attr.background});
             colorOne = new ColorDrawable(typedArray.getColor(0, 0xFF00FF));
             typedArray.recycle();
         }
         else {
-            td = (TransitionDrawable) bc;
-            colorOne = (ColorDrawable) td.getDrawable(1);
+            if (bc instanceof TransitionDrawable) {
+                colorOne = (ColorDrawable) ((TransitionDrawable) bc).getDrawable(1);
+            }
+            else colorOne = (ColorDrawable) bc;
         }
 
+        backgroundColor = color.getColor();
         ColorDrawable[] colors = { colorOne, color };
         td = new TransitionDrawable(colors);
         view.setBackground(td);
