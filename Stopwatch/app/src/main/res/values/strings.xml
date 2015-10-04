@@ -4,5 +4,6 @@
     <string name="menu_start_counter_title">Запустить</string>
     <string name="menu_stop_counter_title">Остановить</string>
     <string name="chronometer_notification_title">Chronometer</string>
-    <string name="chronometer_settings">Настройки</string>
+    <string name="chronometer_color_settings">Выбор цвета</string>
+    <string name="title_activity_settings">SettingsActivity</string>
 </resources>

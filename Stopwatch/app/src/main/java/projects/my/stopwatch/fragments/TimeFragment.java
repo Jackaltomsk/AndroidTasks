@@ -1,8 +1,15 @@
 package projects.my.stopwatch.fragments;
 
+import android.app.Activity;
+import android.content.Intent;
+import android.content.res.TypedArray;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.os.SystemClock;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -11,21 +18,25 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Chronometer;
+import android.widget.Toast;
 
-import projects.my.stopwatch.ChronoService;
+import projects.my.stopwatch.activities.SettingsActivity;
+import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.R;
-import projects.my.stopwatch.StopwatchActivity;
+import projects.my.stopwatch.activities.StopwatchActivity;
 import projects.my.stopwatch.common.Time;
 
 public class TimeFragment extends Fragment
     implements StopwatchActivity.ChronoConnectedListener {
+
     private long currentTime;
     private static final String CURRENT_TIME_KEY = "CURRENT_TIME_KEY";
     private boolean isRunning;
     private static final String IS_RUNNING = "IS_RUNNING";
     private Chronometer chronometer;
-    private StopwatchActivity activity;
+    private ChronoService service;
     private MenuItem startStopItem;
+    public static final int REQUEST_COLOR_CODE = 1;
 
     public TimeFragment() {
         // Required empty public constructor
@@ -34,7 +45,6 @@ public class TimeFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        activity = (StopwatchActivity) getActivity();
         setHasOptionsMenu(true);
 
         if (savedInstanceState != null) {
@@ -48,6 +58,12 @@ public class TimeFragment extends Fragment
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.time_fragment, container, false);
         chronometer = (Chronometer)view.findViewById(R.id.chronometer);
+
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        if (activity == null) {
+            throw new ClassCastException("Activity фрагмента должен наследовать от" +
+                    " AppCompatActivity");
+        }
 
         // Установка тулбара.
         Toolbar toolbar = (Toolbar) activity.findViewById(R.id.toolbar);
@@ -70,9 +86,7 @@ public class TimeFragment extends Fragment
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        switch (id) {
+        switch (item.getItemId()) {
             case R.id.start_counter:
                 if (!isRunning) startTimer();
                 else stopTimer();
@@ -80,8 +94,26 @@ public class TimeFragment extends Fragment
             case R.id.drop_counter:
                 resetTimer();
                 break;
+            case R.id.settings:
+                Intent intent = new Intent(getActivity(), SettingsActivity.class);
+                startActivityForResult(intent, REQUEST_COLOR_CODE);
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_COLOR_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                int colorId = data.getIntExtra("color", android.R.color.white);
+                handleBackgroundColorChange(new ColorDrawable(colorId));
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                Toast tst = Toast.makeText(getActivity(), "Request cancelled", Toast.LENGTH_SHORT);
+                tst.show();
+            }
+        }
     }
 
     @Override
@@ -106,7 +138,7 @@ public class TimeFragment extends Fragment
     public void onDestroy() {
         super.onDestroy();
         internalStopTimer();
-        activity.getChronoService().stopNotify(true);
+        if (service != null) service.stopNotify(true);
     }
 
     /**
@@ -124,9 +156,7 @@ public class TimeFragment extends Fragment
         chronometer.start();
         setIsRunning(true);
 
-        if (activity.getChronoService() != null) {
-            activity.getChronoService().startNotify(currentTime, true);
-        }
+        if (service != null) service.startNotify(currentTime, true);
     }
 
     /**
@@ -135,7 +165,7 @@ public class TimeFragment extends Fragment
     public void stopTimer() {
         internalStopTimer();
         setIsRunning(false);
-        activity.getChronoService().stopNotify(false);
+        if (service != null) service.stopNotify(false);
     }
 
     /**
@@ -149,6 +179,7 @@ public class TimeFragment extends Fragment
 
     @Override
     public void handleConnected(ChronoService service) {
+        this.service = service;
         if (isRunning) startTimer();
     }
 
@@ -169,10 +200,39 @@ public class TimeFragment extends Fragment
         if (isRunning) currentTime = Time.calculateElapsed(chronometer.getBase());
     }
 
+    /**
+     * Реализует смену названия пункта меню при старте/остановке хронометра.
+     */
     private void stateChanged() {
         if (startStopItem != null) {
             startStopItem.setTitle(isRunning ?
                     R.string.menu_stop_counter_title : R.string.menu_start_counter_title);
         }
+    }
+
+    /**
+     * Реализует смену цвета фона хронометра.
+     */
+    private void handleBackgroundColorChange(ColorDrawable color) {
+        View view = getActivity().findViewById(R.id.stopwatch_fragment_container);
+        Drawable bc = view.getBackground();
+        ColorDrawable colorOne;
+        TransitionDrawable td;
+
+        // Если фон еще не менялся.
+        if (bc == null) {
+            TypedArray typedArray = getActivity().getTheme().obtainStyledAttributes(new int[]{android.R.attr.background});
+            colorOne = new ColorDrawable(typedArray.getColor(0, 0xFF00FF));
+            typedArray.recycle();
+        }
+        else {
+            td = (TransitionDrawable) bc;
+            colorOne = (ColorDrawable) td.getDrawable(1);
+        }
+
+        ColorDrawable[] colors = { colorOne, color };
+        td = new TransitionDrawable(colors);
+        view.setBackground(td);
+        td.startTransition(2000);
     }
 }

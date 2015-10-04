@@ -1,4 +1,4 @@
-package projects.my.stopwatch;
+package projects.my.stopwatch.activities;
 
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
@@ -9,6 +9,8 @@ import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import projects.my.stopwatch.services.ChronoService;
+import projects.my.stopwatch.R;
 import projects.my.stopwatch.fragments.TimeFragment;
 
 public class StopwatchActivity extends AppCompatActivity {
@@ -56,6 +58,10 @@ public class StopwatchActivity extends AppCompatActivity {
     }
 
     public interface ChronoConnectedListener {
+        /**
+         * Реализует обработку события биндинга сервиса.
+         * @param service Сервис хронометра.
+         */
         public void handleConnected(ChronoService service);
     }
 

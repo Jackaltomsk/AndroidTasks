@@ -1,4 +1,4 @@
-package projects.my.stopwatch;
+package projects.my.stopwatch.services;
 
 import android.app.Activity;
 import android.app.Notification;
@@ -12,6 +12,8 @@ import android.os.IBinder;
 import android.text.format.DateUtils;
 import android.util.Log;
 
+import projects.my.stopwatch.R;
+
 /**
  * Сервис нотификаций для таймеров/хронометров.
  */
@@ -24,7 +26,7 @@ public class ChronoService extends Service {
     private final int ntfId = 1;
 
     public class ChronoBinder extends Binder {
-        ChronoService getService() {
+        public ChronoService getService() {
             return ChronoService.this;
         }
     }
