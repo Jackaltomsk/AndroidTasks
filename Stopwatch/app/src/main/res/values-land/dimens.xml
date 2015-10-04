@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="stopwatch_size">90sp</dimen>
+    <dimen name="stopwatch_size">70sp</dimen>
 </resources>

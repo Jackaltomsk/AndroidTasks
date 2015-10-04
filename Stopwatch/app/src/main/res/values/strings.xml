@@ -6,4 +6,5 @@
     <string name="chronometer_notification_title">Chronometer</string>
     <string name="chronometer_color_settings">Выбор цвета</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="add_time_button_title">Добавить время</string>
 </resources>

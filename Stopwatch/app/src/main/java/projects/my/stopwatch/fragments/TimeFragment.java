@@ -197,6 +197,10 @@ public class TimeFragment extends Fragment
         if (isRunning) startTimer();
     }
 
+    public CharSequence getChronoText() {
+        return chronometer.getText();
+    }
+
     /**
      * Реализует установку флага запуска таймера и оповещение активити о смене статуса.
      * @param flag
