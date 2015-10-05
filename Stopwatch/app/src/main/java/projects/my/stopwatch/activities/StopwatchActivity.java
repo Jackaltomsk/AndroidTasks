@@ -71,6 +71,8 @@ public class StopwatchActivity extends AppCompatActivity {
     }
 
     private void createServiceBinding() {
+        Intent intent = new Intent(this, ChronoService.class);
+        startService(intent);
         chronoConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName className, IBinder service) {
@@ -86,7 +88,6 @@ public class StopwatchActivity extends AppCompatActivity {
                 bound = false;
             }
         };
-        Intent intent = new Intent(this, ChronoService.class);
         bindService(intent, chronoConnection, BIND_AUTO_CREATE);
     }
 

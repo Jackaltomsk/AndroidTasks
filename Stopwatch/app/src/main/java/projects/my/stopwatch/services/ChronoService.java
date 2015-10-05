@@ -8,11 +8,17 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.widget.Chronometer;
+
+import java.util.List;
 
 import projects.my.stopwatch.R;
+import projects.my.stopwatch.common.Time;
 
 /**
  * Сервис нотификаций для таймеров/хронометров.
@@ -25,10 +31,48 @@ public class ChronoService extends Service {
     private Thread thread;
     private final int ntfId = 1;
 
-    public class ChronoBinder extends Binder {
-        public ChronoService getService() {
-            return ChronoService.this;
-        }
+    private Chronometer chronometer;
+    private CountDownTimer timer;
+    private long chronoTime;
+    private long timerTime;
+    private final long oneSecond = 1000;
+    private boolean chronometerRunning;
+    private boolean timerStarted;
+    private ChronometerTimerTick tickListener;
+
+    public interface ChronometerTimerTick {
+        public void Tick(String timeView);
+    }
+
+    public void setTickListener(ChronometerTimerTick listener) {
+        this.tickListener = listener;
+    }
+
+    public boolean getIsChronometerRunning() {
+        return chronometerRunning;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        /*chronometer = new Chronometer(this);
+        chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+            @Override
+            public void onChronometerTick(Chronometer chronometer) {
+                chronoTime += oneSecond;
+                if (tickListener != null) {
+                    tickListener.Tick(DateUtils.formatElapsedTime(chronoTime / oneSecond));
+                }
+                sendNotification(chronoTime,
+                        getResources().getString(R.string.chronometer_notification_title));
+            }
+        });*/
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        //return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     @Override
@@ -39,13 +83,21 @@ public class ChronoService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopChronometer();
         stopNotify(true);
     }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
+        stopChronometer();
         stopNotify(true);
+    }
+
+    public class ChronoBinder extends Binder {
+        public ChronoService getService() {
+            return ChronoService.this;
+        }
     }
 
     /**
@@ -54,19 +106,64 @@ public class ChronoService extends Service {
      */
     public void createNotificationInfrastructure(Activity activity) {
         if (!ntfInfCreated) {
-            ntfManager = (NotificationManager)activity
-                    .getSystemService(Context.NOTIFICATION_SERVICE);
+            ntfManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             Intent activityIntent = new Intent(activity, activity.getClass());
             PendingIntent intent = PendingIntent.getActivity(activity, 0, activityIntent,
                     PendingIntent.FLAG_UPDATE_CURRENT);
 
             ntfBuilder = new Notification.Builder(activity)
                     .setSmallIcon(R.drawable.timer)
-                    .setContentTitle(getResources().getString(R.string.chronometer_notification_title))
                     .setContentIntent(intent)
                     .setPriority(Notification.PRIORITY_HIGH);
             ntfInfCreated = true;
         }
+    }
+
+    public void startChronometer() {
+        if (thread != null) thread.interrupt();
+        final Context thisContext = this;
+        thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                chronometer = new Chronometer(thisContext);
+                chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+                    @Override
+                    public void onChronometerTick(Chronometer chronometer) {
+                        chronoTime += oneSecond;
+                        if (tickListener != null) {
+                            tickListener.Tick(DateUtils.formatElapsedTime(chronoTime / oneSecond));
+                        }
+                        sendNotification(chronoTime,
+                                getResources().getString(R.string.chronometer_notification_title));
+                    }
+                });
+                if (chronoTime > 0) chronometer.setBase(Time.calculateElapsed(chronoTime));
+                else chronometer.setBase(SystemClock.elapsedRealtime());
+                chronometer.start();
+            }
+        });
+        thread.start();
+        chronometerRunning = true;
+    }
+
+    public void stopChronometer() {
+        if (thread != null) thread.interrupt();
+        chronometer.stop();
+        chronometerRunning = false;
+    }
+
+    public void dropChronometer() {
+        this.stopChronometer();
+        chronoTime = 0;
+    }
+
+    private void sendNotification(final long currentTime, String callerName) {
+        Notification ntf = ntfBuilder
+                .setContentTitle(callerName)
+                .setContentText(DateUtils.formatElapsedTime(currentTime / oneSecond))
+                .build();
+        ntf.flags |= Notification.FLAG_NO_CLEAR;
+        ntfManager.notify(ntfId, ntf);
     }
 
     /**
@@ -74,7 +171,7 @@ public class ChronoService extends Service {
      * @param currentTime Стартовое время, в мс.
      * @param isStepForward В какую сторону изменять переданное время.
      */
-    public void startNotify(final long currentTime, final boolean isStepForward) {
+    private void startNotify(final long currentTime, final boolean isStepForward) {
         if (ntfInfCreated) {
             if (thread != null) thread.interrupt();
             thread = new Thread(new Runnable() {
@@ -108,7 +205,7 @@ public class ChronoService extends Service {
      * Реализует останов нотификаций.
      * @param clear Флаг очистки области уведомлений.
      */
-    public void stopNotify(boolean clear) {
+    private void stopNotify(boolean clear) {
         if (thread != null) thread.interrupt();
         if (clear) ntfManager.cancelAll();
     }

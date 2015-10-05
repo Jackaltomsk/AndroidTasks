@@ -8,7 +8,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
@@ -17,28 +16,23 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Chronometer;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import projects.my.stopwatch.activities.SettingsActivity;
 import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.activities.StopwatchActivity;
-import projects.my.stopwatch.common.Time;
 
 public class TimeFragment extends Fragment
     implements StopwatchActivity.ChronoConnectedListener {
 
-    private static final String CURRENT_TIME_KEY = "CURRENT_TIME_KEY";
-    private static final String IS_RUNNING = "IS_RUNNING";
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     public static final int REQUEST_COLOR_CODE = 1;
-    private long currentTime;
-    private boolean isRunning;
     private int backgroundColor;
-    private Chronometer chronometer;
     private ChronoService service;
     private MenuItem startStopItem;
+    private TextView chronometerTime;
 
     public TimeFragment() {
         // Required empty public constructor
@@ -55,9 +49,7 @@ public class TimeFragment extends Fragment
         typedArray.recycle();
 
         if (savedInstanceState != null) {
-            currentTime = savedInstanceState.getLong(CURRENT_TIME_KEY);
             backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
-            setIsRunning(savedInstanceState.getBoolean(IS_RUNNING));
         }
     }
 
@@ -65,17 +57,11 @@ public class TimeFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.time_fragment, container, false);
-        chronometer = (Chronometer)view.findViewById(R.id.chronometer);
-
-        AppCompatActivity activity = (AppCompatActivity) getActivity();
-        if (activity == null) {
-            throw new ClassCastException("Activity фрагмента должен наследовать от" +
-                    " AppCompatActivity");
-        }
+        chronometerTime = (TextView) view.findViewById(R.id.chronometer_time);
 
         // Установка тулбара.
-        Toolbar toolbar = (Toolbar) activity.findViewById(R.id.toolbar);
-        activity.setSupportActionBar(toolbar);
+        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         if (backgroundColor != 0) {
             View fragmentView = getActivity().findViewById(R.id.stopwatch_fragment_container);
@@ -93,7 +79,7 @@ public class TimeFragment extends Fragment
         if (startStopItem == null) {
             throw new NullPointerException("Не найден пункт меню 'Запустить'");
         }
-        stateChanged();
+        //stateChanged();
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -101,7 +87,7 @@ public class TimeFragment extends Fragment
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.start_counter:
-                if (!isRunning) startTimer();
+                if (!service.getIsChronometerRunning()) startTimer();
                 else stopTimer();
                 break;
             case R.id.drop_counter:
@@ -132,27 +118,20 @@ public class TimeFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
-        if (isRunning) startTimer();
-        else {
-            chronometer.setBase(Time.calculateElapsed(currentTime));
-            stateChanged();
-        }
+        startTimer();
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState){
         super.onSaveInstanceState(outState);
-        if (isRunning) currentTime = Time.calculateElapsed(chronometer.getBase());
-        outState.putLong(CURRENT_TIME_KEY, currentTime);
-        outState.putBoolean(IS_RUNNING, isRunning);
         outState.putInt(BACKGROUND_COLOR, backgroundColor);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        internalStopTimer();
-        if (service != null) service.stopNotify(true);
+        service.setTickListener(null);
+        service.dropChronometer();
     }
 
     /**
@@ -160,68 +139,47 @@ public class TimeFragment extends Fragment
      */
     public void startTimer() {
         // Запущен в двух случаях: 1) изменилась ориентация экрана; 2) вернули фокус на активити.
-        if (isRunning) {
-            // Если вернули фокус, то времени прошло больше, чем сохранено.
-            if (Time.calculateElapsed(chronometer.getBase()) > currentTime) {
-                currentTime = Time.calculateElapsed(chronometer.getBase());
-            }
+        if (service != null) {
+            service.setTickListener(new ChronoService.ChronometerTimerTick() {
+                @Override
+                public void Tick(String timeView) {
+                    chronometerTime.setText(timeView);
+                }
+            });
+            service.startChronometer();
+            stateChanged(true);
         }
-        chronometer.setBase(Time.calculateElapsed(currentTime));
-        chronometer.start();
-        setIsRunning(true);
-
-        if (service != null) service.startNotify(currentTime, true);
     }
 
     /**
      * Реализует останов таймера.
      */
     public void stopTimer() {
-        internalStopTimer();
-        setIsRunning(false);
-        if (service != null) service.stopNotify(false);
+        service.stopChronometer();
+        stateChanged(false);
     }
 
     /**
      * Реализует сброс таймера.
      */
     public void resetTimer() {
-        stopTimer();
-        chronometer.setBase(SystemClock.elapsedRealtime());
-        currentTime = 0;
+        service.dropChronometer();
+        stateChanged(false);
     }
 
     @Override
     public void handleConnected(ChronoService service) {
         this.service = service;
-        if (isRunning) startTimer();
     }
 
     public CharSequence getChronoText() {
-        return chronometer.getText();
-    }
-
-    /**
-     * Реализует установку флага запуска таймера и оповещение активити о смене статуса.
-     * @param flag
-     */
-    private void setIsRunning(boolean flag) {
-        isRunning = flag;
-        stateChanged();
-    }
-
-    /**
-     * Реализует останов таймера без изменения флага работы.
-     */
-    private void internalStopTimer() {
-        chronometer.stop();
-        if (isRunning) currentTime = Time.calculateElapsed(chronometer.getBase());
+        return chronometerTime.getText();
     }
 
     /**
      * Реализует смену названия пункта меню при старте/остановке хронометра.
      */
-    private void stateChanged() {
+    private void stateChanged(boolean isRunning) {
         if (startStopItem != null) {
             startStopItem.setTitle(isRunning ?
                     R.string.menu_stop_counter_title : R.string.menu_start_counter_title);
