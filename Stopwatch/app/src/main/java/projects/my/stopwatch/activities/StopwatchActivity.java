@@ -66,6 +66,8 @@ public class StopwatchActivity extends AppCompatActivity {
         CharSequence text = timeFragment.getChronoText();
         listItems.add(text.toString());
         adapter.notifyDataSetChanged();
+        ListView list = (ListView) findViewById(R.id.time_listView);
+        list.setSelection(adapter.getCount() - 1);
     }
 
     private void createServiceBinding() {
