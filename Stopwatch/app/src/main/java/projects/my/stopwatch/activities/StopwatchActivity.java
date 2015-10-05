@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -20,11 +19,11 @@ import projects.my.stopwatch.R;
 import projects.my.stopwatch.fragments.TimeFragment;
 
 public class StopwatchActivity extends AppCompatActivity {
+    private final static String TIME_LIST = "TIME_LIST";
+    private boolean bound;
     private TimeFragment timeFragment;
     private ServiceConnection chronoConnection;
     private ChronoService chronoService;
-    private boolean bound;
-    private final static String TIME_LIST = "TIME_LIST";
     private ArrayList<String> listItems;
     private ArrayAdapter<String> adapter;
 
@@ -95,11 +94,11 @@ public class StopwatchActivity extends AppCompatActivity {
             // Добавление фрагмента в разметку окна, если пересоздается активити.
             FragmentTransaction transaction = manager.beginTransaction();
             timeFragment = new TimeFragment();
-            transaction.add(R.id.frameLayout, timeFragment);
+            transaction.add(R.id.time_fragment_frame, timeFragment);
             transaction.commit();
         }
         else {
-            timeFragment = (TimeFragment) manager.findFragmentById(R.id.frameLayout);
+            timeFragment = (TimeFragment) manager.findFragmentById(R.id.time_fragment_frame);
         }
     }
 
@@ -108,7 +107,7 @@ public class StopwatchActivity extends AppCompatActivity {
         else listItems = savedInstanceState.getStringArrayList(TIME_LIST);
 
         adapter = new ArrayAdapter<>(this, R.layout.listview_item, R.id.textItem, listItems);
-        ListView list = (ListView) findViewById(R.id.listView);
+        ListView list = (ListView) findViewById(R.id.time_listView);
         list.setAdapter(adapter);
     }
 }

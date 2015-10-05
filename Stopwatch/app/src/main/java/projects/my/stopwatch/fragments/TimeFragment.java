@@ -29,16 +29,16 @@ import projects.my.stopwatch.common.Time;
 public class TimeFragment extends Fragment
     implements StopwatchActivity.ChronoConnectedListener {
 
-    private long currentTime;
     private static final String CURRENT_TIME_KEY = "CURRENT_TIME_KEY";
-    private boolean isRunning;
     private static final String IS_RUNNING = "IS_RUNNING";
-    private int backgroundColor;
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
+    public static final int REQUEST_COLOR_CODE = 1;
+    private long currentTime;
+    private boolean isRunning;
+    private int backgroundColor;
     private Chronometer chronometer;
     private ChronoService service;
     private MenuItem startStopItem;
-    public static final int REQUEST_COLOR_CODE = 1;
 
     public TimeFragment() {
         // Required empty public constructor
