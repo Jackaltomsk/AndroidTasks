@@ -9,5 +9,6 @@
         android:id="@+id/chronometer_time"
         android:layout_centerVertical="true"
         android:textSize="@dimen/stopwatch_size"
+        android:text="@string/empty_time"
         android:gravity="center_vertical|center_horizontal" />
 </RelativeLayout>

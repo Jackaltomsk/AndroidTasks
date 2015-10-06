@@ -8,6 +8,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/chronometer_time"
         android:textSize="@dimen/stopwatch_size"
+        android:text="@string/empty_time"
         android:layout_centerInParent="true"
         android:gravity="center" />
 </RelativeLayout>

@@ -145,7 +145,7 @@ public class StopwatchActivity extends AppCompatActivity {
                 break;
             case R.id.drop_counter:
                 timeFragment.resetTimer();
-                stateChanged(true);
+                stateChanged(false);
                 break;
             case R.id.settings:
                 Intent intent = new Intent(this, SettingsActivity.class);

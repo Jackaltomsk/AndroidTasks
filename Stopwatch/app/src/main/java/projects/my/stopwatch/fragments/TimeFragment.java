@@ -30,7 +30,6 @@ public class TimeFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
 
         TypedArray typedArray = getActivity().getTheme().
                 obtainStyledAttributes(new int[]{android.R.attr.background});
@@ -80,15 +79,13 @@ public class TimeFragment extends Fragment
     public void startTimer() {
         // Запущен в двух случаях: 1) изменилась ориентация экрана; 2) вернули фокус на активити.
         if (service != null) {
-            if (!service.getIsChronometerRunning()) {
-                service.setTickListener(new ChronoService.ChronometerTimerTick() {
-                    @Override
-                    public void Tick(String timeView) {
-                        chronometerTime.setText(timeView);
-                    }
-                });
-                service.startChronometer();
-            }
+            service.setTickListener(new ChronoService.ChronometerTimerTick() {
+                @Override
+                public void Tick(String timeView) {
+                    chronometerTime.setText(timeView);
+                }
+            });
+            if (!service.getIsChronometerRunning()) service.startChronometer();
         }
     }
 
@@ -104,6 +101,7 @@ public class TimeFragment extends Fragment
      */
     public void resetTimer() {
         service.dropChronometer();
+        chronometerTime.setText(R.string.empty_time);
     }
 
     @Override

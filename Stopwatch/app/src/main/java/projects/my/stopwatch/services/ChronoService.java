@@ -31,7 +31,6 @@ public class ChronoService extends Service {
     private boolean ntfInfCreated;
     private NotificationManager ntfManager;
     private Notification.Builder ntfBuilder;
-    private Thread thread;
     private final int ntfId = 1;
 
     private Chronometer chronometer;
@@ -71,7 +70,7 @@ public class ChronoService extends Service {
                         getResources().getString(R.string.chronometer_notification_title));
             }
         });
-        timer = new CountDownTimer(6000, oneSecond) {
+        timer = new CountDownTimer(60000, oneSecond) {
             @Override
             public void onTick(long millisUntilFinished) {
                 chronoTime += oneSecond;
@@ -142,14 +141,13 @@ public class ChronoService extends Service {
     public void startChronometer() {
         /*if (chronoTime > 0) chronometer.setBase(Time.calculateElapsed(chronoTime));
         else chronometer.setBase(SystemClock.elapsedRealtime());
-        chronometer.start();
-        chronometerRunning = true;*/
+        chronometer.start();*/
+        chronometerRunning = true;
         timer.start();
     }
 
     public void stopChronometer() {
-        if (thread != null) thread.interrupt();
-        chronometer.stop();
+        timer.cancel();
         chronometerRunning = false;
     }
 
@@ -168,46 +166,10 @@ public class ChronoService extends Service {
     }
 
     /**
-     * Реализует запуск нотификаций частотой 1Гц в отдельном потоке.
-     * @param currentTime Стартовое время, в мс.
-     * @param isStepForward В какую сторону изменять переданное время.
-     */
-    private void startNotify(final long currentTime, final boolean isStepForward) {
-        if (ntfInfCreated) {
-            if (thread != null) thread.interrupt();
-            thread = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    long oneSecond = 1000;
-                    long threadTime = currentTime / oneSecond;
-                    while (threadTime >= 0) {
-                        Notification ntf = ntfBuilder.setContentText(
-                                DateUtils.formatElapsedTime(threadTime))
-                                .build();
-                        ntf.flags |= Notification.FLAG_NO_CLEAR;
-                        //ntf.category = Notification.CATEGORY_ALARM;
-                        ntfManager.notify(ntfId, ntf);
-                        try {
-                            Thread.sleep(oneSecond);
-                            if (isStepForward) threadTime++;
-                            else threadTime--;
-                        } catch (InterruptedException e) {
-                            Log.e("Thread interruption", e.toString());
-                            return;
-                        }
-                    }
-                }
-            });
-            thread.start();
-        }
-    }
-
-    /**
      * Реализует останов нотификаций.
      * @param clear Флаг очистки области уведомлений.
      */
     private void stopNotify(boolean clear) {
-        if (thread != null) thread.interrupt();
         if (clear) ntfManager.cancelAll();
     }
 }

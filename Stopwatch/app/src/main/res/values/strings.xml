@@ -4,7 +4,9 @@
     <string name="menu_start_counter_title">Запустить</string>
     <string name="menu_stop_counter_title">Остановить</string>
     <string name="chronometer_notification_title">Chronometer</string>
+    <string name="timer_notification_title">Timer</string>
     <string name="chronometer_color_settings">Выбор цвета</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="add_time_button_title">Добавить время</string>
+    <string name="empty_time">00:00</string>
 </resources>
