@@ -1,17 +1,23 @@
 package projects.my.stopwatch.activities;
 
+import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.drawable.ColorDrawable;
 import android.os.IBinder;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -21,12 +27,14 @@ import projects.my.stopwatch.fragments.TimeFragment;
 
 public class StopwatchActivity extends AppCompatActivity {
     private final static String TIME_LIST = "TIME_LIST";
+    public static final int REQUEST_COLOR_CODE = 1;
     private boolean bound;
     private TimeFragment timeFragment;
     private ServiceConnection chronoConnection;
     private ChronoService chronoService;
     private ArrayList<String> listItems;
     private ArrayAdapter<String> adapter;
+    private MenuItem startStopItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +65,17 @@ public class StopwatchActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_stopwatch, menu);
+        startStopItem = menu.findItem(R.id.start_counter);
+        super.onCreateOptionsMenu(menu);
+        return true;
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putStringArrayList(TIME_LIST, listItems);
-    }
-
-    public ChronoService getChronoService() {
-        return chronoService;
     }
 
     public void handleAddtimeClick(View view) {
@@ -116,5 +128,51 @@ public class StopwatchActivity extends AppCompatActivity {
         adapter = new ArrayAdapter<>(this, R.layout.listview_item, R.id.textItem, listItems);
         ListView list = (ListView) findViewById(R.id.time_listView);
         list.setAdapter(adapter);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.start_counter:
+                if (!chronoService.getIsChronometerRunning()) {
+                    timeFragment.startTimer();
+                    stateChanged(true);
+                }
+                else {
+                    timeFragment.stopTimer();
+                    stateChanged(false);
+                }
+                break;
+            case R.id.drop_counter:
+                timeFragment.resetTimer();
+                stateChanged(true);
+                break;
+            case R.id.settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivityForResult(intent, REQUEST_COLOR_CODE);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_COLOR_CODE) {
+            if (resultCode == Activity.RESULT_OK) {
+                int colorId = data.getIntExtra("color", android.R.color.white);
+                timeFragment.handleBackgroundColorChange(new ColorDrawable(colorId));
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                Toast tst = Toast.makeText(this, "Request cancelled", Toast.LENGTH_SHORT);
+                tst.show();
+            }
+        }
+    }
+
+    /**
+     * Реализует смену названия пункта меню при старте/остановке хронометра.
+     */
+    private void stateChanged(boolean isRunning) {
+        startStopItem.setTitle(isRunning ? R.string.menu_stop_counter_title : R.string.menu_start_counter_title);
     }
 }
