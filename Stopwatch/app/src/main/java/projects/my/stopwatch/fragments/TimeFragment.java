@@ -8,8 +8,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,15 +55,10 @@ public class TimeFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.time_fragment, container, false);
-        chronometerTime = (TextView) view.findViewById(R.id.chronometer_time);
-
-        // Установка тулбара.
-        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
 
         if (backgroundColor != 0) {
-            View fragmentView = getActivity().findViewById(R.id.stopwatch_fragment_container);
-            fragmentView.setBackground(new ColorDrawable(backgroundColor));
+            chronometerTime = (TextView) view.findViewById(R.id.chronometer_time);
+            chronometerTime.setBackground(new ColorDrawable(backgroundColor));
         }
 
         return view;
@@ -190,7 +183,7 @@ public class TimeFragment extends Fragment
      * Реализует смену цвета фона хронометра.
      */
     private void handleBackgroundColorChange(ColorDrawable color) {
-        View view = getActivity().findViewById(R.id.stopwatch_fragment_container);
+        View view = getActivity().findViewById(R.id.chronometer_time);
         Drawable bc = view.getBackground();
         ColorDrawable colorOne;
         TransitionDrawable td;

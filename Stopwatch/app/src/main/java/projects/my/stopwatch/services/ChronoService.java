@@ -14,8 +14,11 @@ import android.os.SystemClock;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.Chronometer;
+import android.widget.Toast;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.concurrent.CountDownLatch;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.common.Time;
@@ -55,10 +58,11 @@ public class ChronoService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        /*chronometer = new Chronometer(this);
+        chronometer = new Chronometer(this);
         chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
+
                 chronoTime += oneSecond;
                 if (tickListener != null) {
                     tickListener.Tick(DateUtils.formatElapsedTime(chronoTime / oneSecond));
@@ -66,7 +70,23 @@ public class ChronoService extends Service {
                 sendNotification(chronoTime,
                         getResources().getString(R.string.chronometer_notification_title));
             }
-        });*/
+        });
+        timer = new CountDownTimer(6000, oneSecond) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                chronoTime += oneSecond;
+                if (tickListener != null) {
+                    tickListener.Tick(DateUtils.formatElapsedTime(chronoTime / oneSecond));
+                }
+                sendNotification(chronoTime,
+                        getResources().getString(R.string.chronometer_notification_title));
+            }
+
+            @Override
+            public void onFinish() {
+                Toast.makeText(getBaseContext(), "finish", Toast.LENGTH_SHORT);
+            }
+        };
     }
 
     @Override
@@ -112,7 +132,7 @@ public class ChronoService extends Service {
                     PendingIntent.FLAG_UPDATE_CURRENT);
 
             ntfBuilder = new Notification.Builder(activity)
-                    .setSmallIcon(R.drawable.timer)
+                    .setSmallIcon(R.drawable.ic_stat_timer)
                     .setContentIntent(intent)
                     .setPriority(Notification.PRIORITY_HIGH);
             ntfInfCreated = true;
@@ -120,30 +140,11 @@ public class ChronoService extends Service {
     }
 
     public void startChronometer() {
-        if (thread != null) thread.interrupt();
-        final Context thisContext = this;
-        thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                chronometer = new Chronometer(thisContext);
-                chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
-                    @Override
-                    public void onChronometerTick(Chronometer chronometer) {
-                        chronoTime += oneSecond;
-                        if (tickListener != null) {
-                            tickListener.Tick(DateUtils.formatElapsedTime(chronoTime / oneSecond));
-                        }
-                        sendNotification(chronoTime,
-                                getResources().getString(R.string.chronometer_notification_title));
-                    }
-                });
-                if (chronoTime > 0) chronometer.setBase(Time.calculateElapsed(chronoTime));
-                else chronometer.setBase(SystemClock.elapsedRealtime());
-                chronometer.start();
-            }
-        });
-        thread.start();
-        chronometerRunning = true;
+        /*if (chronoTime > 0) chronometer.setBase(Time.calculateElapsed(chronoTime));
+        else chronometer.setBase(SystemClock.elapsedRealtime());
+        chronometer.start();
+        chronometerRunning = true;*/
+        timer.start();
     }
 
     public void stopChronometer() {
