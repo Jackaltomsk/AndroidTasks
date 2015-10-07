@@ -30,6 +30,7 @@ public class TimeFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //setHasOptionsMenu(true);
 
         TypedArray typedArray = getActivity().getTheme().
                 obtainStyledAttributes(new int[]{android.R.attr.background});

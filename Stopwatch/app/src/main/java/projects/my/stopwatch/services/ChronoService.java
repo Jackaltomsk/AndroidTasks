@@ -5,7 +5,6 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.CountDownTimer;
@@ -16,17 +15,14 @@ import android.util.Log;
 import android.widget.Chronometer;
 import android.widget.Toast;
 
-import java.util.List;
-import java.util.Timer;
-import java.util.concurrent.CountDownLatch;
-
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.common.Time;
 
 /**
  * Сервис нотификаций для таймеров/хронометров.
  */
-public class ChronoService extends Service {
+public class ChronoService extends Service
+        implements ManageChronometer, ManageTimer {
     private final ChronoBinder chronoBinder = new ChronoBinder();
     private boolean ntfInfCreated;
     private NotificationManager ntfManager;
@@ -36,11 +32,46 @@ public class ChronoService extends Service {
     private Chronometer chronometer;
     private CountDownTimer timer;
     private long chronoTime;
-    private long timerTime;
     private final long oneSecond = 1000;
     private boolean chronometerRunning;
-    private boolean timerStarted;
+    private boolean timerRunning;
     private ChronometerTimerTick tickListener;
+
+    public void startChronometer() {
+        if (chronoTime > 0) chronometer.setBase(Time.calculateElapsed(chronoTime));
+        else chronometer.setBase(SystemClock.elapsedRealtime());
+        chronometer.start();
+        chronometerRunning = true;
+        //timer.start();
+    }
+
+    public void stopChronometer() {
+        chronometer.stop();
+        chronometerRunning = false;
+    }
+
+    public void dropChronometer() {
+        this.stopChronometer();
+        chronoTime = 0;
+    }
+
+    @Override
+    public void startTimer() {
+        timer.start();
+        timerRunning = true;
+    }
+
+    @Override
+    public void stopTimer() {
+        timer.cancel();
+        timerRunning = false;
+    }
+
+    @Override
+    public void dropTimer() {
+        stopTimer();
+        timer = null;
+    }
 
     public interface ChronometerTimerTick {
         public void Tick(String timeView);
@@ -73,7 +104,7 @@ public class ChronoService extends Service {
         timer = new CountDownTimer(60000, oneSecond) {
             @Override
             public void onTick(long millisUntilFinished) {
-                chronoTime += oneSecond;
+                //chronoTime += oneSecond;
                 if (tickListener != null) {
                     tickListener.Tick(DateUtils.formatElapsedTime(chronoTime / oneSecond));
                 }
@@ -136,24 +167,6 @@ public class ChronoService extends Service {
                     .setPriority(Notification.PRIORITY_HIGH);
             ntfInfCreated = true;
         }
-    }
-
-    public void startChronometer() {
-        /*if (chronoTime > 0) chronometer.setBase(Time.calculateElapsed(chronoTime));
-        else chronometer.setBase(SystemClock.elapsedRealtime());
-        chronometer.start();*/
-        chronometerRunning = true;
-        timer.start();
-    }
-
-    public void stopChronometer() {
-        timer.cancel();
-        chronometerRunning = false;
-    }
-
-    public void dropChronometer() {
-        this.stopChronometer();
-        chronoTime = 0;
     }
 
     private void sendNotification(final long currentTime, String callerName) {
