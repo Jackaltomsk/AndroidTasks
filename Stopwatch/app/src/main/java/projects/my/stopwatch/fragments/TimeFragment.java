@@ -11,16 +11,18 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.activities.StopwatchActivity;
+import projects.my.stopwatch.services.ChronoTimerManager;
+import projects.my.stopwatch.services.ChronometerTimerTick;
+import projects.my.stopwatch.services.ManageTimer;
 
 public class TimeFragment extends Fragment
     implements StopwatchActivity.ChronoConnectedListener {
 
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private int backgroundColor;
-    private ChronoService service;
+    private ManageTimer service;
     private TextView chronometerTime;
 
     public TimeFragment() {
@@ -58,7 +60,7 @@ public class TimeFragment extends Fragment
     @Override
     public void onResume() {
         super.onResume();
-        startTimer();
+        if (service != null) startTimer();
     }
 
     @Override
@@ -70,8 +72,10 @@ public class TimeFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        service.setTickListener(null);
-        service.dropChronometer();
+        //service.setChronoTickListener(null);
+        //service.dropChronometer();
+        service.setTimerTickListener(null);
+        //service.dropTimer();
     }
 
     /**
@@ -80,13 +84,15 @@ public class TimeFragment extends Fragment
     public void startTimer() {
         // Запущен в двух случаях: 1) изменилась ориентация экрана; 2) вернули фокус на активити.
         if (service != null) {
-            service.setTickListener(new ChronoService.ChronometerTimerTick() {
-                @Override
-                public void Tick(String timeView) {
-                    chronometerTime.setText(timeView);
-                }
-            });
-            if (!service.getIsChronometerRunning()) service.startChronometer();
+            if (!service.getIsTimerRunning())  {
+                /*service.setTimerTickListener(new ChronometerTimerTick() {
+                    @Override
+                    public void onTick(String timeView) {
+                        chronometerTime.setText(timeView);
+                    }
+                });*/
+                service.startTimer();
+            }
         }
     }
 
@@ -94,20 +100,36 @@ public class TimeFragment extends Fragment
      * Реализует останов таймера.
      */
     public void stopTimer() {
-        service.stopChronometer();
+        //service.stopChronometer();
+        service.stopTimer();
     }
 
     /**
      * Реализует сброс таймера.
      */
     public void resetTimer() {
-        service.dropChronometer();
+        //service.dropChronometer();
+        service.dropTimer();
         chronometerTime.setText(R.string.empty_time);
     }
 
     @Override
-    public void handleConnected(ChronoService service) {
-        this.service = service;
+    public void handleConnected(ChronoTimerManager service) {
+        this.service = (ManageTimer) service;
+        if (this.service == null) {
+            throw new ClassCastException("service должен реализовывать ManageChronometer");
+        }
+        this.service.setTimerTickListener(new ChronometerTimerTick() {
+            @Override
+            public void onTick(String timeView) {
+                chronometerTime.setText(timeView);
+            }
+
+            @Override
+            public void onFinish() {
+                chronometerTime.setText(getResources().getText(R.string.empty_time));
+            }
+        });
     }
 
     public CharSequence getChronoText() {

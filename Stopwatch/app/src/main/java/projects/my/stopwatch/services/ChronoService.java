@@ -11,9 +11,7 @@ import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.widget.Chronometer;
-import android.widget.Toast;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.common.Time;
@@ -32,22 +30,29 @@ public class ChronoService extends Service
     private Chronometer chronometer;
     private CountDownTimer timer;
     private long chronoTime;
+    private long timerTime;
     private final long oneSecond = 1000;
-    private boolean chronometerRunning;
-    private boolean timerRunning;
-    private ChronometerTimerTick tickListener;
+    private boolean isChronometerRunning;
+    private boolean isTimerRunning;
+    private ChronometerTimerTick chronoTickListener;
+    private ChronometerTimerTick timerTickListener;
+
+    @Override
+    public void setChronoTickListener(ChronometerTimerTick tickListener) {
+        chronoTickListener = tickListener;
+    }
 
     public void startChronometer() {
         if (chronoTime > 0) chronometer.setBase(Time.calculateElapsed(chronoTime));
         else chronometer.setBase(SystemClock.elapsedRealtime());
         chronometer.start();
-        chronometerRunning = true;
+        isChronometerRunning = true;
         //timer.start();
     }
 
     public void stopChronometer() {
         chronometer.stop();
-        chronometerRunning = false;
+        isChronometerRunning = false;
     }
 
     public void dropChronometer() {
@@ -56,33 +61,38 @@ public class ChronoService extends Service
     }
 
     @Override
+    public boolean getIsChronometerRunning() {
+        return isChronometerRunning;
+    }
+
+    @Override
+    public void setTimerTickListener(ChronometerTimerTick tickListener) {
+        timerTickListener = tickListener;
+    }
+
+    @Override
     public void startTimer() {
+        createTimer();
         timer.start();
-        timerRunning = true;
+        isTimerRunning = true;
     }
 
     @Override
     public void stopTimer() {
         timer.cancel();
-        timerRunning = false;
+        timer = null;
+        isTimerRunning = false;
     }
 
     @Override
     public void dropTimer() {
         stopTimer();
-        timer = null;
+        timerTime = 0;
     }
 
-    public interface ChronometerTimerTick {
-        public void Tick(String timeView);
-    }
-
-    public void setTickListener(ChronometerTimerTick listener) {
-        this.tickListener = listener;
-    }
-
-    public boolean getIsChronometerRunning() {
-        return chronometerRunning;
+    @Override
+    public boolean getIsTimerRunning() {
+        return isTimerRunning;
     }
 
     @Override
@@ -94,27 +104,32 @@ public class ChronoService extends Service
             public void onChronometerTick(Chronometer chronometer) {
 
                 chronoTime += oneSecond;
-                if (tickListener != null) {
-                    tickListener.Tick(DateUtils.formatElapsedTime(chronoTime / oneSecond));
+                if (chronoTickListener != null) {
+                    chronoTickListener.onTick(DateUtils.formatElapsedTime(chronoTime / oneSecond));
                 }
-                sendNotification(chronoTime,
-                        getResources().getString(R.string.chronometer_notification_title));
+                sendNotification(chronoTime, getResources().getString(R.string.chronometer_notification_title));
             }
         });
-        timer = new CountDownTimer(60000, oneSecond) {
+    }
+
+    private void createTimer() {
+        timerTime = timerTime < oneSecond ? 6000 : timerTime;
+        timer = new CountDownTimer(timerTime, oneSecond) {
             @Override
             public void onTick(long millisUntilFinished) {
-                //chronoTime += oneSecond;
-                if (tickListener != null) {
-                    tickListener.Tick(DateUtils.formatElapsedTime(chronoTime / oneSecond));
+                if (timerTickListener != null) {
+                    timerTime -= oneSecond;
+                    timerTickListener.onTick(DateUtils.formatElapsedTime(
+                            millisUntilFinished / oneSecond));
                 }
-                sendNotification(chronoTime,
-                        getResources().getString(R.string.chronometer_notification_title));
+                sendNotification(millisUntilFinished, getResources()
+                        .getString(R.string.timer_notification_title));
             }
 
             @Override
             public void onFinish() {
-                Toast.makeText(getBaseContext(), "finish", Toast.LENGTH_SHORT);
+                timerTickListener.onFinish();
+                sendNotification(0, "Done");
             }
         };
     }
@@ -133,6 +148,7 @@ public class ChronoService extends Service
     @Override
     public void onDestroy() {
         super.onDestroy();
+        if (isChronometerRunning)
         stopChronometer();
         stopNotify(true);
     }

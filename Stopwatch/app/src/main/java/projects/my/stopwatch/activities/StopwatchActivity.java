@@ -3,6 +3,7 @@ package projects.my.stopwatch.activities;
 import android.app.Activity;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -24,6 +25,7 @@ import java.util.ArrayList;
 import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.fragments.TimeFragment;
+import projects.my.stopwatch.services.ChronoTimerManager;
 
 public class StopwatchActivity extends AppCompatActivity {
     private final static String TIME_LIST = "TIME_LIST";
@@ -54,7 +56,7 @@ public class StopwatchActivity extends AppCompatActivity {
          * Реализует обработку события биндинга сервиса.
          * @param service Сервис хронометра.
          */
-        public void handleConnected(ChronoService service);
+        public void handleConnected(ChronoTimerManager service);
     }
     @Override
     public void onDestroy() {
@@ -68,6 +70,7 @@ public class StopwatchActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_stopwatch, menu);
         startStopItem = menu.findItem(R.id.start_counter);
+        stateChanged(chronoService.getIsTimerRunning());
         super.onCreateOptionsMenu(menu);
         return true;
     }
@@ -96,6 +99,7 @@ public class StopwatchActivity extends AppCompatActivity {
                 chronoService = binder.getService();
                 chronoService.createNotificationInfrastructure(StopwatchActivity.this);
                 timeFragment.handleConnected(chronoService);
+                //stateChanged(chronoService.getIsTimerRunning());
                 bound = true;
             }
 
@@ -134,7 +138,7 @@ public class StopwatchActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.start_counter:
-                if (!chronoService.getIsChronometerRunning()) {
+                if (!chronoService.getIsTimerRunning()) {
                     timeFragment.startTimer();
                     stateChanged(true);
                 }
