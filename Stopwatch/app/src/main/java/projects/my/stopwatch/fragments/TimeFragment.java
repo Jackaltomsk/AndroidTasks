@@ -26,6 +26,7 @@ public class TimeFragment extends Fragment
         StopwatchActivity.BackgroundColorChange {
 
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
+    private static final String TITLE = "CHRONOMETER";
     private int backgroundColor;
     private ManageChronometer service;
     private TextView chronometerTime;
@@ -108,17 +109,27 @@ public class TimeFragment extends Fragment
         this.service.setChronoTickListener(new ChronometerTimerTick() {
             @Override
             public void onTick(long mils) {
-                chronometerTime.setText(Time.formatElapsedTime(mils));
+                if (chronometerTime != null) chronometerTime.setText(Time.formatElapsedTime(mils));
             }
 
             @Override
             public void onFinish() {
-                chronometerTime.setText(getResources().getText(R.string.empty_time));
+                if (chronometerTime != null) chronometerTime.setText(getResources().getText(R.string.empty_time));
             }
         });
         if (chronometerTime != null) {
             chronometerTime.setText(Time.formatElapsedTime(this.service.getChronoElapsed()));
         }
+    }
+
+    @Override
+    public String getTitle() {
+        return TITLE;
+    }
+
+    @Override
+    public boolean getIsRunning() {
+        return service.getIsChronometerRunning();
     }
 
     @Override
@@ -144,3 +155,4 @@ public class TimeFragment extends Fragment
         td.startTransition(2000);
     }
 }
+

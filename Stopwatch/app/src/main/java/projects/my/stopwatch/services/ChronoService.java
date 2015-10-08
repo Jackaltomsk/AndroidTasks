@@ -20,7 +20,7 @@ import projects.my.stopwatch.common.Time;
 public class ChronoService extends Service
         implements ManageChronometer, ManageTimer {
 
-    private final static long DEFAULT_CHRONOMETER_TIME = 5 * Time.ONE_SECOND;
+    private final static long DEFAULT_CHRONOMETER_TIME = 12 * Time.ONE_SECOND;
     private final ChronoBinder chronoBinder = new ChronoBinder();
     private boolean ntfInfCreated;
     private NotificationManager ntfManager;
@@ -122,7 +122,7 @@ public class ChronoService extends Service
     }
 
     private CountDownTimer createTimer(final boolean isCountUp, long startTime) {
-        long localStartTime;
+        final long localStartTime;
         if (isCountUp) { // если отсчитываем в роли хронометра
             localStartTime = Time.MAXIMUM_TIME_AMOUNT - startTime;
         }
@@ -142,10 +142,10 @@ public class ChronoService extends Service
                 }
                 else {
                     if (timerTickListener != null) {
-                        timerTime -= Time.ONE_SECOND;
-                        timerTickListener.onTick(timerTime);
+                        timerTime += Time.ONE_SECOND;
+                        timerTickListener.onTick(localStartTime - timerTime);
                     }
-                    sendNotification(timerTime, timerTitle, false);
+                    sendNotification(localStartTime - timerTime, timerTitle, false);
                 }
             }
 

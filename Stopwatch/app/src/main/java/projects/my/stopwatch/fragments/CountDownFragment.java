@@ -27,6 +27,7 @@ public class CountDownFragment extends Fragment
         StopwatchActivity.BackgroundColorChange {
 
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
+    private static final String TITLE = "TIMER";
     private int backgroundColor;
     private ManageTimer service;
     private TextView timerTime;
@@ -53,10 +54,10 @@ public class CountDownFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.time_fragment, container, false);
+        View view = inflater.inflate(R.layout.countdown_fragment, container, false);
 
         if (backgroundColor != 0) {
-            timerTime = (TextView) view.findViewById(R.id.chronometer_time);
+            timerTime = (TextView) view.findViewById(R.id.countdown_time);
             timerTime.setBackground(new ColorDrawable(backgroundColor));
         }
 
@@ -72,7 +73,7 @@ public class CountDownFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        service.setTimerTickListener(null);
+        if (service != null) service.setTimerTickListener(null);
     }
 
     @Override
@@ -109,17 +110,27 @@ public class CountDownFragment extends Fragment
         this.service.setTimerTickListener(new ChronometerTimerTick() {
             @Override
             public void onTick(long mils) {
-                timerTime.setText(Time.formatElapsedTime(mils));
+                if (timerTime != null) timerTime.setText(Time.formatElapsedTime(mils));
             }
 
             @Override
             public void onFinish() {
-                timerTime.setText(getResources().getText(R.string.empty_time));
+                if (timerTime != null) timerTime.setText(getResources().getText(R.string.empty_time));
             }
         });
         if (timerTime != null) {
             timerTime.setText(Time.formatElapsedTime(this.service.getTimerElapsed()));
         }
+    }
+
+    @Override
+    public String getTitle() {
+        return TITLE;
+    }
+
+    @Override
+    public boolean getIsRunning() {
+        return service.getIsTimerRunning();
     }
 
     @Override

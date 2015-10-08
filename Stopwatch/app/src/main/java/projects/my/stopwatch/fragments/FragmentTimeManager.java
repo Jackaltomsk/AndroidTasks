@@ -32,4 +32,16 @@ public interface FragmentTimeManager {
      * @param service Поставщик времени.
      */
     void handleConnected(ChronoTimerManager service);
+
+    /**
+     * Реализует получение названия фрагмента.
+     * @return Название фрагмента.
+     */
+    String getTitle();
+
+    /**
+     * Реализует получение флага работы.
+     * @return Флаг работы.
+     */
+    boolean getIsRunning();
 }
