@@ -19,13 +19,14 @@ import projects.my.stopwatch.common.Time;
  */
 public class ChronoService extends Service
         implements ManageChronometer, ManageTimer {
+
+    private final static long DEFAULT_CHRONOMETER_TIME = 5 * Time.ONE_SECOND;
     private final ChronoBinder chronoBinder = new ChronoBinder();
     private boolean ntfInfCreated;
     private NotificationManager ntfManager;
     private Notification.Builder ntfBuilder;
-    private final int ntfId = 1;
 
-    private final static long DEFAULT_CHRONOMETER_TIME = 5 * Time.ONE_SECOND;
+    private final int ntfId = 1;
     private CountDownTimer chronometer;
     private CountDownTimer timer;
     private long chronoTime;
@@ -36,6 +37,12 @@ public class ChronoService extends Service
     private ChronometerTimerTick timerTickListener;
     private String chronoTitle;
     private String timerTitle;
+
+    public class ChronoBinder extends Binder {
+        public ChronoService getService() {
+            return ChronoService.this;
+        }
+    }
 
     @Override
     public void setChronoTickListener(ChronometerTimerTick tickListener) {
@@ -153,7 +160,6 @@ public class ChronoService extends Service
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //return super.onStartCommand(intent, flags, startId);
         return START_STICKY;
     }
 
@@ -178,12 +184,6 @@ public class ChronoService extends Service
         dropChronometer();
         dropTimer();
         ntfManager.cancelAll();
-    }
-
-    public class ChronoBinder extends Binder {
-        public ChronoService getService() {
-            return ChronoService.this;
-        }
     }
 
     /**

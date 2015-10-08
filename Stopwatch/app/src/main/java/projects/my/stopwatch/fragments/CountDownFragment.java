@@ -1,11 +1,11 @@
 package projects.my.stopwatch.fragments;
 
+import android.app.Fragment;
 import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,21 +17,22 @@ import projects.my.stopwatch.common.Time;
 import projects.my.stopwatch.services.ChronoTimerManager;
 import projects.my.stopwatch.services.ChronometerTimerTick;
 import projects.my.stopwatch.services.ManageChronometer;
+import projects.my.stopwatch.services.ManageTimer;
 
 /**
- * Фрагмент, отображающий результат работы хронометра (от нуля).
+ * Фрагмент, отображающий результат работы таймера (отсчет до нуля).
  */
-public class TimeFragment extends Fragment
+public class CountDownFragment extends Fragment
     implements StopwatchActivity.ChronoConnectedListener, FragmentTimeManager,
         StopwatchActivity.BackgroundColorChange {
 
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private int backgroundColor;
-    private ManageChronometer service;
-    private TextView chronometerTime;
+    private ManageTimer service;
+    private TextView timerTime;
 
-    public static TimeFragment newInstance() {
-        TimeFragment fragment = new TimeFragment();
+    public static CountDownFragment newInstance() {
+        CountDownFragment fragment = new CountDownFragment();
         return fragment;
     }
 
@@ -55,8 +56,8 @@ public class TimeFragment extends Fragment
         View view = inflater.inflate(R.layout.time_fragment, container, false);
 
         if (backgroundColor != 0) {
-            chronometerTime = (TextView) view.findViewById(R.id.chronometer_time);
-            chronometerTime.setBackground(new ColorDrawable(backgroundColor));
+            timerTime = (TextView) view.findViewById(R.id.chronometer_time);
+            timerTime.setBackground(new ColorDrawable(backgroundColor));
         }
 
         return view;
@@ -71,53 +72,53 @@ public class TimeFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (service != null) service.setChronoTickListener(null);
+        service.setTimerTickListener(null);
     }
 
     @Override
     public void start() {
         if (service != null) {
-            if (!service.getIsChronometerRunning()) {
-                service.startChronometer();
+            if (!service.getIsTimerRunning()) {
+                service.startTimer();
             }
         }
     }
 
     @Override
     public void stop() {
-        service.stopChronometer();
+        service.stopTimer();
     }
 
     @Override
     public void drop() {
-        service.dropChronometer();
-        chronometerTime.setText(R.string.empty_time);
+        service.dropTimer();
+        timerTime.setText(R.string.empty_time);
     }
 
     @Override
     public String getTimeValue() {
-        return chronometerTime.getText().toString();
+        return timerTime.getText().toString();
     }
 
     @Override
     public void handleConnected(ChronoTimerManager service) {
-        this.service = (ManageChronometer) service;
+        this.service = (ManageTimer) service;
         if (this.service == null) {
             throw new ClassCastException("service должен реализовывать ManageChronometer");
         }
-        this.service.setChronoTickListener(new ChronometerTimerTick() {
+        this.service.setTimerTickListener(new ChronometerTimerTick() {
             @Override
             public void onTick(long mils) {
-                chronometerTime.setText(Time.formatElapsedTime(mils));
+                timerTime.setText(Time.formatElapsedTime(mils));
             }
 
             @Override
             public void onFinish() {
-                chronometerTime.setText(getResources().getText(R.string.empty_time));
+                timerTime.setText(getResources().getText(R.string.empty_time));
             }
         });
-        if (chronometerTime != null) {
-            chronometerTime.setText(Time.formatElapsedTime(this.service.getChronoElapsed()));
+        if (timerTime != null) {
+            timerTime.setText(Time.formatElapsedTime(this.service.getTimerElapsed()));
         }
     }
 

@@ -1,48 +1,41 @@
 package projects.my.stopwatch.activities;
 
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
+import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.graphics.drawable.ColorDrawable;
 import android.os.IBinder;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
+import projects.my.stopwatch.adapters.StopwatchPagerAdapter;
+import projects.my.stopwatch.fragments.CountDownFragment;
+import projects.my.stopwatch.fragments.ListviewFragment;
 import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.fragments.TimeFragment;
 import projects.my.stopwatch.services.ChronoTimerManager;
 
-public class StopwatchActivity extends AppCompatActivity {
+public class StopwatchActivity extends AppCompatActivity
+        implements ListviewFragment.OnListActionListener {
     public static final int REQUEST_COLOR_CODE = 1;
     private boolean bound;
-    private TimeFragment timeFragment;
+    private TimeFragment chronoFragment;
+    private CountDownFragment countDownFragment;
     private ServiceConnection chronoConnection;
     private ChronoService chronoService;
     private MenuItem startStopItem;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_stopwatch);
-        createServiceBinding();
-        createTimeFragment(savedInstanceState);
-        // Установка тулбара.
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-    }
+    private StopwatchPagerAdapter pageAdapter;
+    private ViewPager pager;
 
     public interface ChronoConnectedListener {
 
@@ -53,9 +46,34 @@ public class StopwatchActivity extends AppCompatActivity {
         public void handleConnected(ChronoTimerManager service);
     }
 
-    public interface ListItemGetter {
-        public String getItemText();
-        public void sendItemText(String text);
+    public interface BackgroundColorChange {
+        public void handleBackgroundColorChange(ColorDrawable color);
+    }
+
+    @Override
+    public String getItemText() {
+        return chronoFragment.getTimeValue();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_stopwatch);
+        createServiceBinding();
+        //createTimeFragment(savedInstanceState);
+        setToolbar();
+
+        chronoFragment = TimeFragment.newInstance();
+        countDownFragment = CountDownFragment.newInstance();
+        pageAdapter = new StopwatchPagerAdapter(getFragmentManager(),
+                Arrays.asList((Fragment) chronoFragment/*, countDownFragment*/));
+        pager = (ViewPager) findViewById(R.id.fragmentPager);
+        pager.setAdapter(pageAdapter);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 
     @Override
@@ -75,6 +93,11 @@ public class StopwatchActivity extends AppCompatActivity {
         return true;
     }
 
+    private void setToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+    }
+
     private void createServiceBinding() {
         Intent intent = new Intent(this, ChronoService.class);
         startService(intent);
@@ -84,7 +107,7 @@ public class StopwatchActivity extends AppCompatActivity {
                 ChronoService.ChronoBinder binder = (ChronoService.ChronoBinder) service;
                 chronoService = binder.getService();
                 chronoService.createNotificationInfrastructure(StopwatchActivity.this);
-                timeFragment.handleConnected(chronoService);
+                chronoFragment.handleConnected(chronoService);
                 bound = true;
             }
 
@@ -96,35 +119,21 @@ public class StopwatchActivity extends AppCompatActivity {
         bindService(intent, chronoConnection, BIND_AUTO_CREATE);
     }
 
-    private void createTimeFragment(Bundle savedInstanceState) {
-        FragmentManager manager = getFragmentManager();
-        if (savedInstanceState == null) {
-            // Добавление фрагмента в разметку окна, если пересоздается активити.
-            FragmentTransaction transaction = manager.beginTransaction();
-            timeFragment = new TimeFragment();
-            transaction.add(R.id.time_fragment_frame, timeFragment);
-            transaction.commit();
-        }
-        else {
-            timeFragment = (TimeFragment) manager.findFragmentById(R.id.time_fragment_frame);
-        }
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.start_counter:
                 if (!chronoService.getIsChronometerRunning()) {
-                    timeFragment.start();
+                    chronoFragment.start();
                     stateChanged(true);
                 }
                 else {
-                    timeFragment.stop();
+                    chronoFragment.stop();
                     stateChanged(false);
                 }
                 break;
             case R.id.drop_counter:
-                timeFragment.drop();
+                chronoFragment.drop();
                 stateChanged(false);
                 break;
             case R.id.settings:
@@ -140,7 +149,7 @@ public class StopwatchActivity extends AppCompatActivity {
         if (requestCode == REQUEST_COLOR_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 int colorId = data.getIntExtra("color", android.R.color.white);
-                timeFragment.handleBackgroundColorChange(new ColorDrawable(colorId));
+                chronoFragment.handleBackgroundColorChange(new ColorDrawable(colorId));
             }
             if (resultCode == Activity.RESULT_CANCELED) {
                 Toast tst = Toast.makeText(this, "Request cancelled", Toast.LENGTH_SHORT);
@@ -153,6 +162,7 @@ public class StopwatchActivity extends AppCompatActivity {
      * Реализует смену названия пункта меню при старте/остановке хронометра.
      */
     private void stateChanged(boolean isRunning) {
-        startStopItem.setTitle(isRunning ? R.string.menu_stop_counter_title : R.string.menu_start_counter_title);
+        startStopItem.setTitle(isRunning ? R.string.menu_stop_counter_title :
+                R.string.menu_start_counter_title);
     }
 }
