@@ -9,4 +9,5 @@ public interface ManageChronometer extends ChronoTimerManager {
     void stopChronometer();
     void dropChronometer();
     boolean getIsChronometerRunning();
+    long getChronoElapsed();
 }

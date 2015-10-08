@@ -6,12 +6,10 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Binder;
 import android.os.CountDownTimer;
 import android.os.IBinder;
-import android.os.SystemClock;
-import android.text.format.DateUtils;
-import android.widget.Chronometer;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.common.Time;
@@ -27,15 +25,17 @@ public class ChronoService extends Service
     private Notification.Builder ntfBuilder;
     private final int ntfId = 1;
 
-    private Chronometer chronometer;
+    private final static long DEFAULT_CHRONOMETER_TIME = 5 * Time.ONE_SECOND;
+    private CountDownTimer chronometer;
     private CountDownTimer timer;
     private long chronoTime;
     private long timerTime;
-    private final long oneSecond = 1000;
     private boolean isChronometerRunning;
     private boolean isTimerRunning;
     private ChronometerTimerTick chronoTickListener;
     private ChronometerTimerTick timerTickListener;
+    private String chronoTitle;
+    private String timerTitle;
 
     @Override
     public void setChronoTickListener(ChronometerTimerTick tickListener) {
@@ -43,26 +43,31 @@ public class ChronoService extends Service
     }
 
     public void startChronometer() {
-        if (chronoTime > 0) chronometer.setBase(Time.calculateElapsed(chronoTime));
-        else chronometer.setBase(SystemClock.elapsedRealtime());
+        chronometer = createTimer(true, chronoTime);
         chronometer.start();
         isChronometerRunning = true;
-        //timer.start();
     }
 
     public void stopChronometer() {
-        chronometer.stop();
+        chronometer.cancel();
+        chronometer = null;
         isChronometerRunning = false;
     }
 
     public void dropChronometer() {
-        this.stopChronometer();
+        if (isChronometerRunning) stopChronometer();
         chronoTime = 0;
+        sendNotification(0,chronoTitle, false);
     }
 
     @Override
     public boolean getIsChronometerRunning() {
         return isChronometerRunning;
+    }
+
+    @Override
+    public long getChronoElapsed() {
+        return chronoTime;
     }
 
     @Override
@@ -72,7 +77,7 @@ public class ChronoService extends Service
 
     @Override
     public void startTimer() {
-        createTimer();
+        timer = createTimer(false, timerTime);
         timer.start();
         isTimerRunning = true;
     }
@@ -86,8 +91,9 @@ public class ChronoService extends Service
 
     @Override
     public void dropTimer() {
-        stopTimer();
+        if (isTimerRunning) stopTimer();
         timerTime = 0;
+        sendNotification(0,timerTitle, false);
     }
 
     @Override
@@ -96,42 +102,53 @@ public class ChronoService extends Service
     }
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        chronometer = new Chronometer(this);
-        chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
-            @Override
-            public void onChronometerTick(Chronometer chronometer) {
-
-                chronoTime += oneSecond;
-                if (chronoTickListener != null) {
-                    chronoTickListener.onTick(DateUtils.formatElapsedTime(chronoTime / oneSecond));
-                }
-                sendNotification(chronoTime, getResources().getString(R.string.chronometer_notification_title));
-            }
-        });
+    public long getTimerElapsed() {
+        return timerTime;
     }
 
-    private void createTimer() {
-        timerTime = timerTime < oneSecond ? 6000 : timerTime;
-        timer = new CountDownTimer(timerTime, oneSecond) {
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Resources res = getResources();
+        timerTitle = res.getString(R.string.timer_notification_title);
+        chronoTitle = res.getString(R.string.chronometer_notification_title);
+    }
+
+    private CountDownTimer createTimer(final boolean isCountUp, long startTime) {
+        long localStartTime;
+        if (isCountUp) { // если отсчитываем в роли хронометра
+            localStartTime = Time.MAXIMUM_TIME_AMOUNT - startTime;
+        }
+        else {
+            localStartTime = startTime < Time.ONE_SECOND ? DEFAULT_CHRONOMETER_TIME : startTime;
+        }
+
+        CountDownTimer timer = new CountDownTimer(localStartTime, Time.ONE_SECOND) {
             @Override
             public void onTick(long millisUntilFinished) {
-                if (timerTickListener != null) {
-                    timerTime -= oneSecond;
-                    timerTickListener.onTick(DateUtils.formatElapsedTime(
-                            millisUntilFinished / oneSecond));
+                if (isCountUp) {
+                    if (chronoTickListener != null) {
+                        chronoTime += Time.ONE_SECOND;
+                        chronoTickListener.onTick(chronoTime);
+                    }
+                    sendNotification(chronoTime, chronoTitle, false);
                 }
-                sendNotification(millisUntilFinished, getResources()
-                        .getString(R.string.timer_notification_title));
+                else {
+                    if (timerTickListener != null) {
+                        timerTime -= Time.ONE_SECOND;
+                        timerTickListener.onTick(timerTime);
+                    }
+                    sendNotification(timerTime, timerTitle, false);
+                }
             }
 
             @Override
             public void onFinish() {
                 timerTickListener.onFinish();
-                sendNotification(0, "Done");
+                sendNotification(0, getResources().getString(R.string.timer_on_finish_title), true);
             }
         };
+        return timer;
     }
 
     @Override
@@ -148,16 +165,19 @@ public class ChronoService extends Service
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (isChronometerRunning)
-        stopChronometer();
-        stopNotify(true);
+        shutdown();
     }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
-        stopChronometer();
-        stopNotify(true);
+        shutdown();
+    }
+
+    private void shutdown() {
+        dropChronometer();
+        dropTimer();
+        ntfManager.cancelAll();
     }
 
     public class ChronoBinder extends Binder {
@@ -185,20 +205,16 @@ public class ChronoService extends Service
         }
     }
 
-    private void sendNotification(final long currentTime, String callerName) {
+    private void sendNotification(final long currentTime, String callerName, boolean isFinal) {
         Notification ntf = ntfBuilder
                 .setContentTitle(callerName)
-                .setContentText(DateUtils.formatElapsedTime(currentTime / oneSecond))
+                .setContentText(Time.formatElapsedTime(currentTime))
                 .build();
         ntf.flags |= Notification.FLAG_NO_CLEAR;
+        if (isFinal) {
+            ntf.defaults |= Notification.DEFAULT_VIBRATE;
+            ntf.defaults |= Notification.DEFAULT_SOUND;
+        }
         ntfManager.notify(ntfId, ntf);
-    }
-
-    /**
-     * Реализует останов нотификаций.
-     * @param clear Флаг очистки области уведомлений.
-     */
-    private void stopNotify(boolean clear) {
-        if (clear) ntfManager.cancelAll();
     }
 }

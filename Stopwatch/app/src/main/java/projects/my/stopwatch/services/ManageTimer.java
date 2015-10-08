@@ -9,4 +9,5 @@ public interface ManageTimer extends ChronoTimerManager {
     void stopTimer();
     void dropTimer();
     boolean getIsTimerRunning();
+    long getTimerElapsed();
 }

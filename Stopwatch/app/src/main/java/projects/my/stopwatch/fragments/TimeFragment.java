@@ -13,16 +13,17 @@ import android.widget.TextView;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.activities.StopwatchActivity;
+import projects.my.stopwatch.common.Time;
 import projects.my.stopwatch.services.ChronoTimerManager;
 import projects.my.stopwatch.services.ChronometerTimerTick;
-import projects.my.stopwatch.services.ManageTimer;
+import projects.my.stopwatch.services.ManageChronometer;
 
 public class TimeFragment extends Fragment
     implements StopwatchActivity.ChronoConnectedListener {
 
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private int backgroundColor;
-    private ManageTimer service;
+    private ManageChronometer service;
     private TextView chronometerTime;
 
     public TimeFragment() {
@@ -32,7 +33,6 @@ public class TimeFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setHasOptionsMenu(true);
 
         TypedArray typedArray = getActivity().getTheme().
                 obtainStyledAttributes(new int[]{android.R.attr.background});
@@ -58,12 +58,6 @@ public class TimeFragment extends Fragment
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (service != null) startTimer();
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState){
         super.onSaveInstanceState(outState);
         outState.putInt(BACKGROUND_COLOR, backgroundColor);
@@ -72,26 +66,16 @@ public class TimeFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //service.setChronoTickListener(null);
-        //service.dropChronometer();
-        service.setTimerTickListener(null);
-        //service.dropTimer();
+        service.setChronoTickListener(null);
     }
 
     /**
      * Реализует старт таймера.
      */
-    public void startTimer() {
-        // Запущен в двух случаях: 1) изменилась ориентация экрана; 2) вернули фокус на активити.
+    public void start() {
         if (service != null) {
-            if (!service.getIsTimerRunning())  {
-                /*service.setTimerTickListener(new ChronometerTimerTick() {
-                    @Override
-                    public void onTick(String timeView) {
-                        chronometerTime.setText(timeView);
-                    }
-                });*/
-                service.startTimer();
+            if (!service.getIsChronometerRunning()) {
+                service.startChronometer();
             }
         }
     }
@@ -99,30 +83,28 @@ public class TimeFragment extends Fragment
     /**
      * Реализует останов таймера.
      */
-    public void stopTimer() {
-        //service.stopChronometer();
-        service.stopTimer();
+    public void stop() {
+        service.stopChronometer();
     }
 
     /**
      * Реализует сброс таймера.
      */
-    public void resetTimer() {
-        //service.dropChronometer();
-        service.dropTimer();
+    public void drop() {
+        service.dropChronometer();
         chronometerTime.setText(R.string.empty_time);
     }
 
     @Override
     public void handleConnected(ChronoTimerManager service) {
-        this.service = (ManageTimer) service;
+        this.service = (ManageChronometer) service;
         if (this.service == null) {
             throw new ClassCastException("service должен реализовывать ManageChronometer");
         }
-        this.service.setTimerTickListener(new ChronometerTimerTick() {
+        this.service.setChronoTickListener(new ChronometerTimerTick() {
             @Override
-            public void onTick(String timeView) {
-                chronometerTime.setText(timeView);
+            public void onTick(long mils) {
+                chronometerTime.setText(Time.formatElapsedTime(mils));
             }
 
             @Override
@@ -130,6 +112,7 @@ public class TimeFragment extends Fragment
                 chronometerTime.setText(getResources().getText(R.string.empty_time));
             }
         });
+        chronometerTime.setText(Time.formatElapsedTime(this.service.getChronoElapsed()));
     }
 
     public CharSequence getChronoText() {

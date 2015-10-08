@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/add_time_button_title"
+        android:background="@drawable/button_ripple"
+        android:onClick="handleAddtimeClick"
+        android:id="@+id/button_add_time"
+        android:layout_centerHorizontal="true"
+        android:paddingLeft="@dimen/button_text_padding"
+        android:paddingRight="@dimen/button_text_padding"
+        android:layout_marginTop="@dimen/element_margin_stopwatch" />
+    <ListView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/time_listView"
+        android:layout_below="@+id/button_add_time"
+        android:listSelector="@android:color/transparent"
+        android:layout_marginTop="@dimen/element_margin_stopwatch" />
+</RelativeLayout>
