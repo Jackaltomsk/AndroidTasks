@@ -99,7 +99,7 @@ public class StopwatchActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.menu_stopwatch, menu);
         startStopItem = menu.findItem(R.id.start_counter);
         super.onCreateOptionsMenu(menu);
-        stateChanged(chronoService.getIsTimerRunning());
+        if (chronoService != null) stateChanged(chronoService.getIsTimerRunning());
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(pager);

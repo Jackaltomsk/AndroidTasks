@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="buttonPressed">#E0E0E0</color>
-    <color name="button">#F5F5F5</color>
+    <color name="primary">#2196f3</color>
+    <color name="primary_dark">#1976d2</color>
+    <color name="accent">#82b1ff</color>
+    <color name="text_color_primary">#000000</color>
+    <color name="text_color_secondary">#b3000000</color>
 </resources>
