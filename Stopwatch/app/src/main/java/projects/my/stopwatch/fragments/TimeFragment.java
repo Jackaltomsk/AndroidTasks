@@ -54,9 +54,8 @@ public class TimeFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.time_fragment, container, false);
-
+        chronometerTime = (TextView) view.findViewById(R.id.chronometer_time);
         if (backgroundColor != 0) {
-            chronometerTime = (TextView) view.findViewById(R.id.chronometer_time);
             chronometerTime.setBackground(new ColorDrawable(backgroundColor));
         }
 
@@ -86,13 +85,15 @@ public class TimeFragment extends Fragment
 
     @Override
     public void stop() {
-        service.stopChronometer();
+        if (service != null) service.stopChronometer();
     }
 
     @Override
     public void drop() {
-        service.dropChronometer();
-        chronometerTime.setText(R.string.empty_time);
+        if (service != null) {
+            service.dropChronometer();
+            chronometerTime.setText(R.string.empty_time);
+        }
     }
 
     @Override
@@ -129,7 +130,8 @@ public class TimeFragment extends Fragment
 
     @Override
     public boolean getIsRunning() {
-        return service.getIsChronometerRunning();
+        if (service != null) return service.getIsChronometerRunning();
+        else return false;
     }
 
     @Override

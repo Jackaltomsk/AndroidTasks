@@ -19,24 +19,22 @@ import projects.my.stopwatch.common.Time;
  */
 public class ChronoService extends Service
         implements ManageChronometer, ManageTimer {
-
     private final static long DEFAULT_CHRONOMETER_TIME = 12 * Time.ONE_SECOND;
-    private final ChronoBinder chronoBinder = new ChronoBinder();
-    private boolean ntfInfCreated;
-    private NotificationManager ntfManager;
-    private Notification.Builder ntfBuilder;
-
     private final int ntfId = 1;
-    private CountDownTimer chronometer;
-    private CountDownTimer timer;
-    private long chronoTime;
-    private long timerTime;
+    private boolean ntfInfCreated;
     private boolean isChronometerRunning;
     private boolean isTimerRunning;
-    private ChronometerTimerTick chronoTickListener;
-    private ChronometerTimerTick timerTickListener;
+    private long chronoTime;
+    private long timerTime;
     private String chronoTitle;
     private String timerTitle;
+    private final ChronoBinder chronoBinder = new ChronoBinder();
+    private NotificationManager ntfManager;
+    private Notification.Builder ntfBuilder;
+    private CountDownTimer chronometer;
+    private CountDownTimer timer;
+    private ChronometerTimerTick chronoTickListener;
+    private ChronometerTimerTick timerTickListener;
 
     public class ChronoBinder extends Binder {
         public ChronoService getService() {
@@ -127,7 +125,9 @@ public class ChronoService extends Service
             localStartTime = Time.MAXIMUM_TIME_AMOUNT - startTime;
         }
         else {
-            localStartTime = startTime < Time.ONE_SECOND ? DEFAULT_CHRONOMETER_TIME : startTime;
+            localStartTime = startTime < Time.ONE_SECOND ?
+                    DEFAULT_CHRONOMETER_TIME :
+                    DEFAULT_CHRONOMETER_TIME - startTime;
         }
 
         CountDownTimer timer = new CountDownTimer(localStartTime, Time.ONE_SECOND) {
@@ -143,9 +143,9 @@ public class ChronoService extends Service
                 else {
                     if (timerTickListener != null) {
                         timerTime += Time.ONE_SECOND;
-                        timerTickListener.onTick(localStartTime - timerTime);
+                        timerTickListener.onTick(DEFAULT_CHRONOMETER_TIME - timerTime);
                     }
-                    sendNotification(localStartTime - timerTime, timerTitle, false);
+                    sendNotification(DEFAULT_CHRONOMETER_TIME - timerTime, timerTitle, false);
                 }
             }
 
@@ -153,6 +153,7 @@ public class ChronoService extends Service
             public void onFinish() {
                 timerTickListener.onFinish();
                 sendNotification(0, getResources().getString(R.string.timer_on_finish_title), true);
+                timerTime = 0;
             }
         };
         return timer;

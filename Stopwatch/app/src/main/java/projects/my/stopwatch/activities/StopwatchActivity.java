@@ -63,21 +63,9 @@ public class StopwatchActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stopwatch);
-        createServiceBinding();
+        initViewPager();
         setToolbar();
-
-        chronoFragment = TimeFragment.newInstance();
-        countDownFragment = CountDownFragment.newInstance();
-        currentFragment = chronoFragment;
-
-        android.app.FragmentManager manager = getFragmentManager();
-        FragmentTransaction tr = manager.beginTransaction();
-        tr.attach(chronoFragment).attach(countDownFragment).commit();
-
-        pageAdapter = new StopwatchPagerAdapter(getFragmentManager(),
-                Arrays.asList((Fragment) chronoFragment, countDownFragment));
-        pager = (ViewPager) findViewById(R.id.fragmentPager);
-        pager.setAdapter(pageAdapter);
+        createServiceBinding();
     }
 
     @Override
@@ -99,14 +87,18 @@ public class StopwatchActivity extends AppCompatActivity
         startStopItem = menu.findItem(R.id.start_counter);
         super.onCreateOptionsMenu(menu);
         if (chronoService != null) stateChanged(chronoService.getIsTimerRunning());
+        setupTabs();
+        return true;
+    }
 
+    private void setupTabs() {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(pager);
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 int position = tab.getPosition();
-                currentFragment = (FragmentTimeManager) pageAdapter.getItem(position);
+                updateCurrentFragment(position);
                 stateChanged(currentFragment.getIsRunning());
                 pager.setCurrentItem(position);
             }
@@ -121,8 +113,42 @@ public class StopwatchActivity extends AppCompatActivity
                 return;
             }
         });
+    }
 
-        return true;
+    private void updateCurrentFragment(int position) {
+        currentFragment = (FragmentTimeManager) pageAdapter.getItem(position);
+    }
+
+    private void initViewPager() {
+        chronoFragment = TimeFragment.newInstance();
+        countDownFragment = CountDownFragment.newInstance();
+        currentFragment = chronoFragment;
+
+        android.app.FragmentManager manager = getFragmentManager();
+        FragmentTransaction tr = manager.beginTransaction();
+        tr.attach(chronoFragment).attach(countDownFragment).commit();
+
+        pageAdapter = new StopwatchPagerAdapter(getFragmentManager(),
+                Arrays.asList((Fragment) chronoFragment, countDownFragment));
+        pager = (ViewPager) findViewById(R.id.fragmentPager);
+        pager.setAdapter(pageAdapter);
+        pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset,
+                                       int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                updateCurrentFragment(position);
+                stateChanged(currentFragment.getIsRunning());
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                return;
+            }
+        });
     }
 
     private void setToolbar() {
@@ -133,7 +159,6 @@ public class StopwatchActivity extends AppCompatActivity
     private void createServiceBinding() {
         Intent intent = new Intent(this, ChronoService.class);
         startService(intent);
-        final Activity act = this;
         chronoConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName className, IBinder service) {
@@ -142,7 +167,6 @@ public class StopwatchActivity extends AppCompatActivity
                 chronoService.createNotificationInfrastructure(StopwatchActivity.this);
                 chronoFragment.handleConnected(chronoService);
                 countDownFragment.handleConnected(chronoService);
-                //Toast.makeText(act, "Service connected", Toast.LENGTH_SHORT).show();
                 bound = true;
             }
 

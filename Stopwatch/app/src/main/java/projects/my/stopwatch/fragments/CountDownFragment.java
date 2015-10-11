@@ -87,13 +87,15 @@ public class CountDownFragment extends Fragment
 
     @Override
     public void stop() {
-        service.stopTimer();
+        if (service != null) service.stopTimer();
     }
 
     @Override
     public void drop() {
-        service.dropTimer();
-        timerTime.setText(R.string.empty_time);
+        if (service != null) {
+            service.dropTimer();
+            timerTime.setText(R.string.empty_time);
+        }
     }
 
     @Override
@@ -130,7 +132,8 @@ public class CountDownFragment extends Fragment
 
     @Override
     public boolean getIsRunning() {
-        return service.getIsTimerRunning();
+        if (service != null) return service.getIsTimerRunning();
+        else return false;
     }
 
     @Override
