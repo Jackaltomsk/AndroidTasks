@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
@@ -5,7 +6,7 @@
     android:layout_height="match_parent">
     <include layout="@layout/toolbar" />
     <include layout="@layout/view_tabs" />
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
         android:orientation="vertical"
         android:layout_height="wrap_content" android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -16,17 +17,12 @@
         <android.support.v4.view.ViewPager
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:id="@+id/fragmentPager"
-            android:layout_gravity="top"
-            android:layout_below="@+id/sliding_tabs"
-            android:layout_alignParentStart="true">
-        </android.support.v4.view.ViewPager>
+            android:layout_height="wrap_content"
+            android:id="@+id/fragmentPager" />
         <fragment android:name="projects.my.stopwatch.fragments.ListviewFragment"
             android:id="@+id/listviewFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:layout="@layout/listview_fragment"
-            android:layout_below="@id/fragmentPager" />
-    </RelativeLayout>
+            tools:layout="@layout/listview_fragment" />
+    </LinearLayout>
 </LinearLayout>

@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_centerInParent="true">
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/chronometer_time"
-        android:textSize="@dimen/stopwatch_size"
-        android:text="@string/empty_time"
-        android:layout_centerInParent="true"
-        android:gravity="center" />
-</RelativeLayout>
+    android:id="@+id/chronometer_time"
+    android:textSize="@dimen/stopwatch_size"
+    android:text="@string/empty_time"
+    android:layout_centerInParent="true"
+    android:gravity="center" />

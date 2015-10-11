@@ -198,7 +198,7 @@ public class ChronoService extends Service
                     PendingIntent.FLAG_UPDATE_CURRENT);
 
             ntfBuilder = new Notification.Builder(activity)
-                    .setSmallIcon(R.drawable.ic_stat_timer)
+                    .setSmallIcon(R.drawable.ic_alarm_black_24dp)
                     .setContentIntent(intent)
                     .setPriority(Notification.PRIORITY_HIGH);
             ntfInfCreated = true;

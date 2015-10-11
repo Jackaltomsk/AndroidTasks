@@ -9,7 +9,6 @@ import android.content.ServiceConnection;
 import android.graphics.drawable.ColorDrawable;
 import android.os.IBinder;
 import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,12 +19,12 @@ import android.widget.Toast;
 
 import java.util.Arrays;
 
+import projects.my.stopwatch.R;
 import projects.my.stopwatch.adapters.StopwatchPagerAdapter;
 import projects.my.stopwatch.fragments.CountDownFragment;
 import projects.my.stopwatch.fragments.FragmentTimeManager;
 import projects.my.stopwatch.fragments.ListviewFragment;
 import projects.my.stopwatch.services.ChronoService;
-import projects.my.stopwatch.R;
 import projects.my.stopwatch.fragments.TimeFragment;
 import projects.my.stopwatch.services.ChronoTimerManager;
 
@@ -109,6 +108,7 @@ public class StopwatchActivity extends AppCompatActivity
                 int position = tab.getPosition();
                 currentFragment = (FragmentTimeManager) pageAdapter.getItem(position);
                 stateChanged(currentFragment.getIsRunning());
+                pager.setCurrentItem(position);
             }
 
             @Override
