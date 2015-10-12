@@ -23,8 +23,7 @@ import projects.my.stopwatch.services.ManageTimer;
  * Фрагмент, отображающий результат работы таймера (отсчет до нуля).
  */
 public class CountDownFragment extends Fragment
-    implements StopwatchActivity.ChronoConnectedListener, FragmentTimeManager,
-        StopwatchActivity.BackgroundColorChange {
+    implements StopwatchActivity.ChronoConnectedListener, FragmentTimeManager {
 
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private static final String TITLE = "TIMER";
@@ -134,28 +133,5 @@ public class CountDownFragment extends Fragment
     public boolean getIsRunning() {
         if (service != null) return service.getIsTimerRunning();
         else return false;
-    }
-
-    @Override
-    public void handleBackgroundColorChange(ColorDrawable color) {
-        View view = getActivity().findViewById(R.id.chronometer_time);
-        Drawable bc = view.getBackground();
-        ColorDrawable colorOne;
-        TransitionDrawable td;
-
-        // Если фон еще не менялся.
-        if (bc == null) colorOne = new ColorDrawable(backgroundColor);
-        else {
-            if (bc instanceof TransitionDrawable) {
-                colorOne = (ColorDrawable) ((TransitionDrawable) bc).getDrawable(1);
-            }
-            else colorOne = (ColorDrawable) bc;
-        }
-
-        backgroundColor = color.getColor();
-        ColorDrawable[] colors = { colorOne, color };
-        td = new TransitionDrawable(colors);
-        view.setBackground(td);
-        td.startTransition(2000);
     }
 }

@@ -22,12 +22,9 @@ import projects.my.stopwatch.services.ManageChronometer;
  * Фрагмент, отображающий результат работы хронометра (от нуля).
  */
 public class TimeFragment extends Fragment
-    implements StopwatchActivity.ChronoConnectedListener, FragmentTimeManager,
-        StopwatchActivity.BackgroundColorChange {
+    implements StopwatchActivity.ChronoConnectedListener, FragmentTimeManager {
 
-    private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private static final String TITLE = "CHRONOMETER";
-    private int backgroundColor;
     private ManageChronometer service;
     private TextView chronometerTime;
 
@@ -39,15 +36,6 @@ public class TimeFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        TypedArray typedArray = getActivity().getTheme().
-                obtainStyledAttributes(new int[]{android.R.attr.background});
-        backgroundColor = typedArray.getColor(0, 0xFF00FF);
-        typedArray.recycle();
-
-        if (savedInstanceState != null) {
-            backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
-        }
     }
 
     @Override
@@ -55,17 +43,12 @@ public class TimeFragment extends Fragment
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.time_fragment, container, false);
         chronometerTime = (TextView) view.findViewById(R.id.chronometer_time);
-        if (backgroundColor != 0) {
-            chronometerTime.setBackground(new ColorDrawable(backgroundColor));
-        }
-
         return view;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState){
         super.onSaveInstanceState(outState);
-        outState.putInt(BACKGROUND_COLOR, backgroundColor);
     }
 
     @Override
@@ -132,29 +115,6 @@ public class TimeFragment extends Fragment
     public boolean getIsRunning() {
         if (service != null) return service.getIsChronometerRunning();
         else return false;
-    }
-
-    @Override
-    public void handleBackgroundColorChange(ColorDrawable color) {
-        View view = getActivity().findViewById(R.id.chronometer_time);
-        Drawable bc = view.getBackground();
-        ColorDrawable colorOne;
-        TransitionDrawable td;
-
-        // Если фон еще не менялся.
-        if (bc == null) colorOne = new ColorDrawable(backgroundColor);
-        else {
-            if (bc instanceof TransitionDrawable) {
-                colorOne = (ColorDrawable) ((TransitionDrawable) bc).getDrawable(1);
-            }
-            else colorOne = (ColorDrawable) bc;
-        }
-
-        backgroundColor = color.getColor();
-        ColorDrawable[] colors = { colorOne, color };
-        td = new TransitionDrawable(colors);
-        view.setBackground(td);
-        td.startTransition(2000);
     }
 }
 

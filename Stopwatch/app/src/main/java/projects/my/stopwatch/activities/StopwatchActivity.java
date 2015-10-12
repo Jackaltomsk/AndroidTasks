@@ -6,7 +6,10 @@ import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.IBinder;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
@@ -15,6 +18,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -30,8 +34,10 @@ import projects.my.stopwatch.services.ChronoTimerManager;
 
 public class StopwatchActivity extends AppCompatActivity
         implements ListviewFragment.OnListActionListener {
-    public static final int REQUEST_COLOR_CODE = 1;
+    private static final int REQUEST_COLOR_CODE = 1;
+    private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private boolean bound;
+    private int backgroundColor;
     private TimeFragment chronoFragment;
     private CountDownFragment countDownFragment;
     private FragmentTimeManager currentFragment;
@@ -50,10 +56,6 @@ public class StopwatchActivity extends AppCompatActivity
         public void handleConnected(ChronoTimerManager service);
     }
 
-    public interface BackgroundColorChange {
-        public void handleBackgroundColorChange(ColorDrawable color);
-    }
-
     @Override
     public String getItemText() {
         return chronoFragment.getTimeValue();
@@ -66,6 +68,19 @@ public class StopwatchActivity extends AppCompatActivity
         initViewPager();
         setToolbar();
         createServiceBinding();
+
+        if (savedInstanceState != null) {
+            backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
+        }
+        else {
+            TypedArray typedArray = getTheme().
+                    obtainStyledAttributes(new int[]{android.R.attr.background});
+            backgroundColor = typedArray.getColor(0, 0xFF00FF);
+            typedArray.recycle();
+        }
+
+        View mainContainer = findViewById(R.id.stopwatch_main_container);
+        mainContainer.setBackground(new ColorDrawable(backgroundColor));
     }
 
     @Override
@@ -89,6 +104,12 @@ public class StopwatchActivity extends AppCompatActivity
         if (chronoService != null) stateChanged(chronoService.getIsTimerRunning());
         setupTabs();
         return true;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(BACKGROUND_COLOR, backgroundColor);
     }
 
     private void setupTabs() {
@@ -208,7 +229,7 @@ public class StopwatchActivity extends AppCompatActivity
         if (requestCode == REQUEST_COLOR_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 int colorId = data.getIntExtra("color", android.R.color.white);
-                chronoFragment.handleBackgroundColorChange(new ColorDrawable(colorId));
+                handleBackgroundColorChange(new ColorDrawable(colorId));
             }
             if (resultCode == Activity.RESULT_CANCELED) {
                 Toast tst = Toast.makeText(this, "Request cancelled", Toast.LENGTH_SHORT);
@@ -223,5 +244,27 @@ public class StopwatchActivity extends AppCompatActivity
     private void stateChanged(boolean isRunning) {
         startStopItem.setTitle(isRunning ? R.string.menu_stop_counter_title :
                 R.string.menu_start_counter_title);
+    }
+
+    private void handleBackgroundColorChange(ColorDrawable color) {
+        View mainContainer = findViewById(R.id.stopwatch_main_container);
+        Drawable bc = mainContainer.getBackground();
+        ColorDrawable colorOne;
+        TransitionDrawable td;
+
+        // Если фон еще не менялся.
+        if (bc == null) colorOne = new ColorDrawable(backgroundColor);
+        else {
+            if (bc instanceof TransitionDrawable) {
+                colorOne = (ColorDrawable) ((TransitionDrawable) bc).getDrawable(1);
+            }
+            else colorOne = (ColorDrawable) bc;
+        }
+
+        backgroundColor = color.getColor();
+        ColorDrawable[] colors = { colorOne, color };
+        td = new TransitionDrawable(colors);
+        mainContainer.setBackground(td);
+        td.startTransition(2000);
     }
 }

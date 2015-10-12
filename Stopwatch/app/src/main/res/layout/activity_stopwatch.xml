@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/stopwatch_main_container">
     <include layout="@layout/toolbar" />
     <include layout="@layout/view_tabs" />
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -13,7 +14,7 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
         android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".StopwatchActivity"
-        android:id="@+id/stopwatch_fragment_container">
+        android:id="@+id/stopwatch_active_part">
         <android.support.v4.view.ViewPager
             xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
