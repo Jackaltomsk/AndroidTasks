@@ -98,9 +98,11 @@ public class TimeFragment extends Fragment
 
             @Override
             public void onFinish() {
-                if (chronometerTime != null) chronometerTime.setText(getResources().getText(R.string.empty_time));
+                if (chronometerTime != null) chronometerTime.setText(
+                        getResources().getText(R.string.empty_time));
             }
         });
+
         if (chronometerTime != null) {
             chronometerTime.setText(Time.formatElapsedTime(this.service.getChronoElapsed()));
         }

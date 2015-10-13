@@ -20,7 +20,8 @@ import projects.my.stopwatch.common.Time;
 public class ChronoService extends Service
         implements ManageChronometer, ManageTimer {
     private final static long DEFAULT_CHRONOMETER_TIME = 12 * Time.ONE_SECOND;
-    private final int ntfId = 1;
+    private final int chronoNtfId = 0;
+    private final int timerNtfId = 1;
     private boolean ntfInfCreated;
     private boolean isChronometerRunning;
     private boolean isTimerRunning;
@@ -62,7 +63,7 @@ public class ChronoService extends Service
     public void dropChronometer() {
         if (isChronometerRunning) stopChronometer();
         chronoTime = 0;
-        sendNotification(0,chronoTitle, false);
+        ntfManager.cancel(chronoNtfId);
     }
 
     @Override
@@ -98,7 +99,7 @@ public class ChronoService extends Service
     public void dropTimer() {
         if (isTimerRunning) stopTimer();
         timerTime = 0;
-        sendNotification(0,timerTitle, false);
+        ntfManager.cancel(timerNtfId);
     }
 
     @Override
@@ -138,21 +139,22 @@ public class ChronoService extends Service
                         chronoTime += Time.ONE_SECOND;
                         chronoTickListener.onTick(chronoTime);
                     }
-                    sendNotification(chronoTime, chronoTitle, false);
+                    sendNotification(chronoTime, chronoTitle, chronoNtfId, false);
                 }
                 else {
                     if (timerTickListener != null) {
                         timerTime += Time.ONE_SECOND;
                         timerTickListener.onTick(DEFAULT_CHRONOMETER_TIME - timerTime);
                     }
-                    sendNotification(DEFAULT_CHRONOMETER_TIME - timerTime, timerTitle, false);
+                    sendNotification(DEFAULT_CHRONOMETER_TIME - timerTime, timerTitle, timerNtfId,
+                            false);
                 }
             }
 
             @Override
             public void onFinish() {
                 timerTickListener.onFinish();
-                sendNotification(0, getResources().getString(R.string.timer_on_finish_title), true);
+                sendNotification(0, getResources().getString(R.string.timer_on_finish_title), timerNtfId, true);
                 timerTime = 0;
             }
         };
@@ -206,7 +208,8 @@ public class ChronoService extends Service
         }
     }
 
-    private void sendNotification(final long currentTime, String callerName, boolean isFinal) {
+    private void sendNotification(final long currentTime, String callerName, int ntfId,
+                                  boolean isFinal) {
         Notification ntf = ntfBuilder
                 .setContentTitle(callerName)
                 .setContentText(Time.formatElapsedTime(currentTime))

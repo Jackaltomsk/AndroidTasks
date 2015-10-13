@@ -7,4 +7,9 @@
         <item name="android:textColorPrimary">@color/text_color_primary</item>
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
     </style>
+
+    <style name="ThemeOverlay.AppTheme" parent="ThemeOverlay.AppCompat.Light">
+        <item name="android:colorBackground">@color/accent</item>
+        <item name="android:textColor">@color/text_color_primary</item>
+    </style>
 </resources>
