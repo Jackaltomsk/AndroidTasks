@@ -12,6 +12,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -45,7 +46,6 @@ public class StopwatchActivity extends AppCompatActivity
     private MenuItem startStopItem;
     private StopwatchPagerAdapter pageAdapter;
     private ViewPager pager;
-    private ArrayList<Fragment> fragments;
 
     public interface ChronoConnectedListener {
 
@@ -64,11 +64,10 @@ public class StopwatchActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        boolean isFirstRun = savedInstanceState == null;
         setContentView(R.layout.activity_stopwatch);
-        initViewPager(isFirstRun);
+        initViewPager();
         setToolbar();
-        createServiceBinding(isFirstRun);
+        createServiceBinding();
 
         if (savedInstanceState != null) {
             backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
@@ -141,29 +140,18 @@ public class StopwatchActivity extends AppCompatActivity
         currentFragment = (FragmentTimeManager) pageAdapter.getItem(position);
     }
 
-    private void initViewPager(boolean isFirstRun) {
-        fragments = new ArrayList<>();
-        if (isFirstRun) {
-            fragments.add(TimeFragment.newInstance());
-            fragments.add(CountDownFragment.newInstance());
-        }
-        else {
-            FragmentManager manager = getFragmentManager();
-            fragments.add(manager.findFragmentById(R.id.chronometer_time));
-            fragments.add(manager.findFragmentById(R.id.countdown_time));
-        }
-        currentFragment = (FragmentTimeManager) fragments.get(0);
-
-        /*FragmentManager manager = getFragmentManager();
-        FragmentTransaction tr = manager.beginTransaction();
-        for (Fragment fmg : fragments) {
-            tr.attach(fmg);
-        }
-        tr.commit();*/
-
-        pageAdapter = new StopwatchPagerAdapter(getFragmentManager(), fragments);
+    private void initViewPager() {
         pager = (ViewPager) findViewById(R.id.fragmentPager);
+        pageAdapter = new StopwatchPagerAdapter(getFragmentManager());
         pager.setAdapter(pageAdapter);
+
+        // Пререндерим вью для фрагментов.
+        Fragment[] fragments = pageAdapter.getFragments();
+        for (int i = 0; i < fragments.length; i++) {
+            pageAdapter.instantiateItem(pager, i);
+        }
+        currentFragment = (FragmentTimeManager) fragments[0];
+
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset,
@@ -188,7 +176,7 @@ public class StopwatchActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
     }
 
-    private void createServiceBinding(boolean isFirstRun) {
+    private void createServiceBinding() {
         Intent intent = new Intent(this, ChronoService.class);
         startService(intent);
         chronoConnection = new ServiceConnection() {
@@ -198,7 +186,7 @@ public class StopwatchActivity extends AppCompatActivity
                 chronoService = binder.getService();
                 chronoService.createNotificationInfrastructure(StopwatchActivity.this);
 
-                for (Fragment fmg : fragments) {
+                for (Fragment fmg : pageAdapter.getFragments()) {
                     if (fmg instanceof FragmentTimeManager) {
                         ((FragmentTimeManager) fmg).handleConnected(chronoService);
                     }
@@ -257,8 +245,10 @@ public class StopwatchActivity extends AppCompatActivity
      * Реализует смену названия пункта меню при старте/остановке хронометра.
      */
     private void stateChanged(boolean isRunning) {
-        startStopItem.setTitle(isRunning ? R.string.menu_stop_counter_title :
-                R.string.menu_start_counter_title);
+        if (startStopItem != null) {
+            startStopItem.setTitle(isRunning ? R.string.menu_stop_counter_title :
+                    R.string.menu_start_counter_title);
+        }
     }
 
     private void handleBackgroundColorChange(ColorDrawable color) {

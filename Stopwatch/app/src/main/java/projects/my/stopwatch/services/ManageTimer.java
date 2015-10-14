@@ -9,7 +9,7 @@ public interface ManageTimer extends ChronoTimerManager {
      * @param tickListener
      */
     void setTimerTickListener(ChronometerTimerTick tickListener);
-    void startTimer();
+    void startTimer(long seconds);
     void stopTimer();
     void dropTimer();
     boolean getIsTimerRunning();

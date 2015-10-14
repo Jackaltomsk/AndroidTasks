@@ -27,6 +27,7 @@ public class ChronoService extends Service
     private boolean isTimerRunning;
     private long chronoTime;
     private long timerTime;
+    private long customTimerTime;
     private String chronoTitle;
     private String timerTitle;
     private final ChronoBinder chronoBinder = new ChronoBinder();
@@ -82,7 +83,11 @@ public class ChronoService extends Service
     }
 
     @Override
-    public void startTimer() {
+    public void startTimer(long seconds) {
+        if (seconds > 0 && timerTime == 0) {
+            customTimerTime = seconds * Time.ONE_SECOND;
+            timerTime = customTimerTime;
+        }
         timer = createTimer(false, timerTime);
         timer.start();
         isTimerRunning = true;
@@ -99,6 +104,7 @@ public class ChronoService extends Service
     public void dropTimer() {
         if (isTimerRunning) stopTimer();
         timerTime = 0;
+        customTimerTime = 0;
         ntfManager.cancel(timerNtfId);
     }
 
@@ -126,9 +132,9 @@ public class ChronoService extends Service
             localStartTime = Time.MAXIMUM_TIME_AMOUNT - startTime;
         }
         else {
+            long defaultTime = customTimerTime > 0 ? customTimerTime : DEFAULT_CHRONOMETER_TIME;
             localStartTime = startTime < Time.ONE_SECOND ?
-                    DEFAULT_CHRONOMETER_TIME :
-                    DEFAULT_CHRONOMETER_TIME - startTime;
+                    defaultTime : defaultTime - startTime;
         }
 
         CountDownTimer timer = new CountDownTimer(localStartTime, Time.ONE_SECOND) {

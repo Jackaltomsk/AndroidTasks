@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import projects.my.stopwatch.R;
@@ -25,7 +26,6 @@ import projects.my.stopwatch.services.ManageTimer;
 public class CountDownFragment extends Fragment
     implements StopwatchActivity.ChronoConnectedListener, FragmentTimeManager {
 
-    private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private static final String TITLE = "TIMER";
     private int backgroundColor;
     private ManageTimer service;
@@ -39,15 +39,6 @@ public class CountDownFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        TypedArray typedArray = getActivity().getTheme().
-                obtainStyledAttributes(new int[]{android.R.attr.background});
-        backgroundColor = typedArray.getColor(0, 0xFF00FF);
-        typedArray.recycle();
-
-        if (savedInstanceState != null) {
-            backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
-        }
     }
 
     @Override
@@ -66,7 +57,6 @@ public class CountDownFragment extends Fragment
     @Override
     public void onSaveInstanceState(Bundle outState){
         super.onSaveInstanceState(outState);
-        outState.putInt(BACKGROUND_COLOR, backgroundColor);
     }
 
     @Override
@@ -79,7 +69,10 @@ public class CountDownFragment extends Fragment
     public void start() {
         if (service != null) {
             if (!service.getIsTimerRunning()) {
-                service.startTimer();
+                EditText edit = (EditText) getActivity().findViewById(R.id.input_countdown_seconds);
+                String number = edit.getText().toString();
+                long seconds = Long.parseLong(number);
+                service.startTimer(seconds);
             }
         }
     }
