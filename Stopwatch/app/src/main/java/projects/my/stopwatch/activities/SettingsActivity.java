@@ -23,6 +23,11 @@ public class SettingsActivity extends AppCompatActivity {
         fillGridWithColors(grid);
     }
 
+    /**
+     * Реализует обработку клика по цвету.
+     * @param view Вью кнопки.
+     * @throws NullPointerException Исключение в случае, если переданное вью равно null.
+     */
     private void handleImageViewClick(View view) throws NullPointerException {
         Button btn = (Button) view;
         if (btn == null) throw new NullPointerException("Вью ячейки должна быть кнопкой.");
@@ -34,6 +39,10 @@ public class SettingsActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Реализует заполнение гридп кнопками-цветами.
+     * @param grid Грид.
+     */
     private void fillGridWithColors(GridLayout grid) {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override

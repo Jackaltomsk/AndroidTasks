@@ -161,7 +161,9 @@ public class ChronoService extends Service
             public void onFinish() {
                 timerTickListener.onFinish();
                 sendNotification(0, getResources().getString(R.string.timer_on_finish_title), timerNtfId, true);
+                stopTimer();
                 timerTime = 0;
+                customTimerTime = 0;
             }
         };
         return timer;

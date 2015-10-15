@@ -66,6 +66,7 @@ public class StopwatchPagerAdapter extends FragmentPagerAdapter {
     }
 
     public Fragment[] getFragments() {
+        // Отдаем новый массив, чтобы нельзя было изменить внутренний.
         return new Fragment[] { fragments[0], fragments[1] };
     }
 }

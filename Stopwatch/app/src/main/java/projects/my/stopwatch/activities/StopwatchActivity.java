@@ -24,6 +24,9 @@ import android.view.View;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.adapters.StopwatchPagerAdapter;
@@ -68,19 +71,7 @@ public class StopwatchActivity extends AppCompatActivity
         initViewPager();
         setToolbar();
         createServiceBinding();
-
-        if (savedInstanceState != null) {
-            backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
-        }
-        else {
-            TypedArray typedArray = getTheme().
-                    obtainStyledAttributes(new int[]{android.R.attr.background});
-            backgroundColor = typedArray.getColor(0, 0xFF00FF);
-            typedArray.recycle();
-        }
-
-        View mainContainer = findViewById(R.id.stopwatch_main_container);
-        mainContainer.setBackground(new ColorDrawable(backgroundColor));
+        initBackground(savedInstanceState);
     }
 
     @Override
@@ -101,7 +92,9 @@ public class StopwatchActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.menu_stopwatch, menu);
         startStopItem = menu.findItem(R.id.start_counter);
         super.onCreateOptionsMenu(menu);
-        if (chronoService != null && currentFragment != null) stateChanged(currentFragment.getIsRunning());
+        if (chronoService != null && currentFragment != null) {
+            stateChanged(currentFragment.getIsRunning());
+        }
         setupTabs();
         return true;
     }
@@ -112,6 +105,9 @@ public class StopwatchActivity extends AppCompatActivity
         outState.putInt(BACKGROUND_COLOR, backgroundColor);
     }
 
+    /**
+     * Реализует инициализацию табовю.
+     */
     private void setupTabs() {
         TabLayout tabLayout = (TabLayout) findViewById(R.id.sliding_tabs);
         tabLayout.setupWithViewPager(pager);
@@ -136,10 +132,17 @@ public class StopwatchActivity extends AppCompatActivity
         });
     }
 
+    /**
+     * Реализует обновление текущего(выбранного) фрагмента.
+     * @param position Позиция фрагмента в пейджере.
+     */
     private void updateCurrentFragment(int position) {
         currentFragment = (FragmentTimeManager) pageAdapter.getItem(position);
     }
 
+    /**
+     * Реализует инициализапцию вьюпейджера и адаптера страниц.
+     */
     private void initViewPager() {
         pager = (ViewPager) findViewById(R.id.fragmentPager);
         pageAdapter = new StopwatchPagerAdapter(getFragmentManager());
@@ -171,11 +174,17 @@ public class StopwatchActivity extends AppCompatActivity
         });
     }
 
+    /**
+     * Реализует инициализацию тулбара.
+     */
     private void setToolbar() {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
     }
 
+    /**
+     * Реализует запуск и биндинг сервиса.
+     */
     private void createServiceBinding() {
         Intent intent = new Intent(this, ChronoService.class);
         startService(intent);
@@ -207,6 +216,15 @@ public class StopwatchActivity extends AppCompatActivity
         switch (item.getItemId()) {
             case R.id.start_counter:
                 if (!currentFragment.getIsRunning()) {
+                    // Останавливаем все работающие хронометры/таймеры, кроме текущего.
+                    List<Fragment> af = new ArrayList<>();
+                    Collections.addAll(af, pageAdapter.getFragments());
+                    af.remove(currentFragment);
+                    for (Fragment fr : af) {
+                        FragmentTimeManager frt = (FragmentTimeManager) fr;
+                        if (frt.getIsRunning()) frt.stop();
+                    }
+
                     currentFragment.start();
                     stateChanged(true);
                 }
@@ -251,6 +269,29 @@ public class StopwatchActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Реализует инициализацию цвета бэкграунда активити.
+     * @param savedInstanceState
+     */
+    private void initBackground(Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
+        }
+        else {
+            TypedArray typedArray = getTheme().
+                    obtainStyledAttributes(new int[]{android.R.attr.background});
+            backgroundColor = typedArray.getColor(0, 0xFF00FF);
+            typedArray.recycle();
+        }
+
+        View mainContainer = findViewById(R.id.stopwatch_main_container);
+        mainContainer.setBackground(new ColorDrawable(backgroundColor));
+    }
+
+    /**
+     * Реализует сменю цвета бэкграунда.
+     * @param color Цвет.
+     */
     private void handleBackgroundColorChange(ColorDrawable color) {
         View mainContainer = findViewById(R.id.stopwatch_main_container);
         Drawable bc = mainContainer.getBackground();
