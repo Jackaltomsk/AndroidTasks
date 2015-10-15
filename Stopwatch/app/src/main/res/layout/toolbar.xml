@@ -7,4 +7,4 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:elevation="@dimen/toolbar_elevation"
-    app:popupTheme="@style/ThemeOverlay.AppTheme" />
+    app:popupTheme="@style/OptionsBackground.AppTheme" />

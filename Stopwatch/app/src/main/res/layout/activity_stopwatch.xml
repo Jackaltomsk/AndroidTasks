@@ -20,10 +20,5 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/fragmentPager" />
-        <fragment android:name="projects.my.stopwatch.fragments.ListviewFragment"
-            android:id="@+id/listviewFragment"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:layout="@layout/listview_fragment" />
     </LinearLayout>
 </LinearLayout>

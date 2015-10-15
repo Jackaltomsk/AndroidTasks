@@ -27,7 +27,6 @@ public class CountDownFragment extends Fragment
     implements StopwatchActivity.ChronoConnectedListener, FragmentTimeManager {
 
     private static final String TITLE = "TIMER";
-    private int backgroundColor;
     private ManageTimer service;
     private TextView timerTime;
 
@@ -45,12 +44,7 @@ public class CountDownFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.countdown_fragment, container, false);
-
-        if (backgroundColor != 0) {
-            timerTime = (TextView) view.findViewById(R.id.countdown_time);
-            timerTime.setBackground(new ColorDrawable(backgroundColor));
-        }
-
+        timerTime = (TextView) view.findViewById(R.id.countdown_time);
         return view;
     }
 
@@ -71,7 +65,14 @@ public class CountDownFragment extends Fragment
             if (!service.getIsTimerRunning()) {
                 EditText edit = (EditText) getActivity().findViewById(R.id.input_countdown_seconds);
                 String number = edit.getText().toString();
-                long seconds = Long.parseLong(number);
+                long seconds;
+                try {
+                    seconds = Long.parseLong(number);
+                }
+                catch (NumberFormatException ex) {
+                    seconds = 0;
+                }
+
                 service.startTimer(seconds);
             }
         }

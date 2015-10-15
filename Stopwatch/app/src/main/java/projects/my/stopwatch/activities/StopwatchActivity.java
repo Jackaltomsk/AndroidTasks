@@ -150,7 +150,7 @@ public class StopwatchActivity extends AppCompatActivity
         for (int i = 0; i < fragments.length; i++) {
             pageAdapter.instantiateItem(pager, i);
         }
-        currentFragment = (FragmentTimeManager) fragments[0];
+        currentFragment = (FragmentTimeManager) pageAdapter.getItem(0);
 
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override

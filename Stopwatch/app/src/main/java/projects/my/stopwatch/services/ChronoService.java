@@ -86,7 +86,7 @@ public class ChronoService extends Service
     public void startTimer(long seconds) {
         if (seconds > 0 && timerTime == 0) {
             customTimerTime = seconds * Time.ONE_SECOND;
-            timerTime = customTimerTime;
+            //timerTime = customTimerTime;
         }
         timer = createTimer(false, timerTime);
         timer.start();
@@ -128,12 +128,12 @@ public class ChronoService extends Service
 
     private CountDownTimer createTimer(final boolean isCountUp, long startTime) {
         final long localStartTime;
+        final long defaultTime = customTimerTime > 0 ? customTimerTime : DEFAULT_CHRONOMETER_TIME;
         if (isCountUp) { // если отсчитываем в роли хронометра
             localStartTime = Time.MAXIMUM_TIME_AMOUNT - startTime;
         }
         else {
-            long defaultTime = customTimerTime > 0 ? customTimerTime : DEFAULT_CHRONOMETER_TIME;
-            localStartTime = startTime < Time.ONE_SECOND ?
+            localStartTime = (customTimerTime - startTime) < Time.ONE_SECOND ?
                     defaultTime : defaultTime - startTime;
         }
 
@@ -150,9 +150,9 @@ public class ChronoService extends Service
                 else {
                     if (timerTickListener != null) {
                         timerTime += Time.ONE_SECOND;
-                        timerTickListener.onTick(DEFAULT_CHRONOMETER_TIME - timerTime);
+                        timerTickListener.onTick(defaultTime - timerTime);
                     }
-                    sendNotification(DEFAULT_CHRONOMETER_TIME - timerTime, timerTitle, timerNtfId,
+                    sendNotification(defaultTime - timerTime, timerTitle, timerNtfId,
                             false);
                 }
             }

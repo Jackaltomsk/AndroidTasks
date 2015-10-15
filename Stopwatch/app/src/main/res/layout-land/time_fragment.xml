@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:id="@+id/chronometer_time"
-    android:layout_centerVertical="true"
-    android:textSize="@dimen/stopwatch_size"
-    android:text="@string/empty_time"
-    android:gravity="center_vertical|center_horizontal" />
+    android:layout_height="match_parent"
+    android:orientation="horizontal" >
+    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/chronometer_time"
+        android:textSize="@dimen/stopwatch_size"
+        android:text="@string/empty_time"
+        android:gravity="center" />
+    <fragment android:name="projects.my.stopwatch.fragments.ListviewFragment"
+        android:id="@+id/listviewFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout="@layout/listview_fragment" />
+</LinearLayout>
