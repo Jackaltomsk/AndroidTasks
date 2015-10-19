@@ -24,6 +24,7 @@ public class ListviewFragment extends Fragment {
 
     public interface OnListActionListener {
         public String getItemText();
+        public boolean canAddItemText();
     }
 
     @Override
@@ -40,10 +41,12 @@ public class ListviewFragment extends Fragment {
         addItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CharSequence text = listener.getItemText();
-                listItems.add(text.toString());
-                adapter.notifyDataSetChanged();
-                list.setSelection(adapter.getCount() - 1);
+                if (listener.canAddItemText()) {
+                    CharSequence text = listener.getItemText();
+                    listItems.add(text.toString());
+                    adapter.notifyDataSetChanged();
+                    list.setSelection(adapter.getCount() - 1);
+                }
             }
         });
         list = (ListView) view.findViewById(R.id.time_listView);

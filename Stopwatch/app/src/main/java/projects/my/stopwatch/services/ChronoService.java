@@ -20,8 +20,7 @@ import projects.my.stopwatch.common.Time;
 public class ChronoService extends Service
         implements ManageChronometer, ManageTimer {
     private final static long DEFAULT_CHRONOMETER_TIME = 12 * Time.ONE_SECOND;
-    private final int chronoNtfId = 0;
-    private final int timerNtfId = 1;
+    private final int ntfId = 0;
     private boolean ntfInfCreated;
     private boolean isChronometerRunning;
     private boolean isTimerRunning;
@@ -62,9 +61,11 @@ public class ChronoService extends Service
     }
 
     public void dropChronometer() {
-        if (isChronometerRunning) stopChronometer();
+        if (isChronometerRunning) {
+            stopChronometer();
+            ntfManager.cancel(ntfId);
+        }
         chronoTime = 0;
-        ntfManager.cancel(chronoNtfId);
     }
 
     @Override
@@ -86,8 +87,8 @@ public class ChronoService extends Service
     public void startTimer(long seconds) {
         if (seconds > 0 && timerTime == 0) {
             customTimerTime = seconds * Time.ONE_SECOND;
-            //timerTime = customTimerTime;
         }
+        else if (seconds == 0) customTimerTime = DEFAULT_CHRONOMETER_TIME;
         timer = createTimer(false, timerTime);
         timer.start();
         isTimerRunning = true;
@@ -102,10 +103,12 @@ public class ChronoService extends Service
 
     @Override
     public void dropTimer() {
-        if (isTimerRunning) stopTimer();
+        if (isTimerRunning) {
+            stopTimer();
+            ntfManager.cancel(ntfId);
+        }
         timerTime = 0;
         customTimerTime = 0;
-        ntfManager.cancel(timerNtfId);
     }
 
     @Override
@@ -145,22 +148,21 @@ public class ChronoService extends Service
                         chronoTime += Time.ONE_SECOND;
                         chronoTickListener.onTick(chronoTime);
                     }
-                    sendNotification(chronoTime, chronoTitle, chronoNtfId, false);
+                    sendNotification(chronoTime, chronoTitle, false);
                 }
                 else {
                     if (timerTickListener != null) {
                         timerTime += Time.ONE_SECOND;
                         timerTickListener.onTick(defaultTime - timerTime);
                     }
-                    sendNotification(defaultTime - timerTime, timerTitle, timerNtfId,
-                            false);
+                    sendNotification(defaultTime - timerTime, timerTitle, false);
                 }
             }
 
             @Override
             public void onFinish() {
                 timerTickListener.onFinish();
-                sendNotification(0, getResources().getString(R.string.timer_on_finish_title), timerNtfId, true);
+                sendNotification(0, getResources().getString(R.string.timer_on_finish_title), true);
                 stopTimer();
                 timerTime = 0;
                 customTimerTime = 0;
@@ -216,8 +218,7 @@ public class ChronoService extends Service
         }
     }
 
-    private void sendNotification(final long currentTime, String callerName, int ntfId,
-                                  boolean isFinal) {
+    private void sendNotification(final long currentTime, String callerName, boolean isFinal) {
         Notification ntf = ntfBuilder
                 .setContentTitle(callerName)
                 .setContentText(Time.formatElapsedTime(currentTime))

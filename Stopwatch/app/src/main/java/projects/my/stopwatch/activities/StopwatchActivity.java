@@ -65,6 +65,11 @@ public class StopwatchActivity extends AppCompatActivity
     }
 
     @Override
+    public boolean canAddItemText() {
+        return currentFragment.getIsRunning();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stopwatch);

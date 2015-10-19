@@ -19,10 +19,11 @@ import projects.my.stopwatch.fragments.TimeFragment;
  */
 public class StopwatchPagerAdapter extends FragmentPagerAdapter {
     private Fragment[] fragments;
+    private final static int FRAGMENTS_COUNT = 2;
 
     public StopwatchPagerAdapter(FragmentManager fm) {
         super(fm);
-        fragments = new Fragment[2];
+        fragments = new Fragment[FRAGMENTS_COUNT];
     }
 
     @Override
@@ -67,6 +68,10 @@ public class StopwatchPagerAdapter extends FragmentPagerAdapter {
 
     public Fragment[] getFragments() {
         // Отдаем новый массив, чтобы нельзя было изменить внутренний.
-        return new Fragment[] { fragments[0], fragments[1] };
+        Fragment[] newArray = new Fragment[FRAGMENTS_COUNT];
+        for (int i = 0; i < FRAGMENTS_COUNT; i++) {
+            newArray[i] = fragments[i];
+        }
+        return newArray;
     }
 }
