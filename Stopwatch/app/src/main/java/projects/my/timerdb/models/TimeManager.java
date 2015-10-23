@@ -11,36 +11,37 @@ import java.util.Collection;
  * Модель менеджеров времени.
  */
 @DatabaseTable()
-public class TimeManager {
-
-    @DatabaseField(generatedId = true)
-    private int Id;
+public class TimeManager extends BaseEntity {
 
     @DatabaseField(canBeNull = false)
-    private String Name;
+    private String name;
 
     @ForeignCollectionField(eager = true)
-    private Collection<TimeCutoff> Cutoffs;
+    private Collection<TimeCutoff> cutoffs;
 
     public TimeManager() {
-        Cutoffs = new ArrayList<>();
+        cutoffs = new ArrayList<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        if (name != null && !name.isEmpty()) this.name = name;
     }
 
     public TimeCutoff[] getCutoffs() {
-        return Cutoffs.toArray(new TimeCutoff[Cutoffs.size()]);
+        return cutoffs.toArray(new TimeCutoff[cutoffs.size()]);
     }
 
     public boolean addCutoff(TimeCutoff cutoff) {
         cutoff.setTimeManager(this);
-        return Cutoffs.add(cutoff);
+        return cutoffs.add(cutoff);
     }
 
     public boolean removeCutoff(TimeCutoff cutoff) {
         cutoff.setTimeManager(null);
-        return Cutoffs.remove(cutoff);
-    }
-
-    public void setName(String name) {
-        if (name != null && !name.isEmpty()) Name = name;
+        return cutoffs.remove(cutoff);
     }
 }

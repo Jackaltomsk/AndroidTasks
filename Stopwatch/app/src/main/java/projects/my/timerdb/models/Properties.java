@@ -7,19 +7,40 @@ import com.j256.ormlite.table.DatabaseTable;
  * Модель основных свойств приложения.
  */
 @DatabaseTable()
-public class Properties {
+public class Properties extends BaseEntity {
 
-    @DatabaseField(generatedId = true)
-    private int Id;
+    @DatabaseField(canBeNull = false)
+    private String name;
 
-    @DatabaseField
-    private int Color;
+    @DatabaseField(canBeNull = false)
+    private String type;
 
-    public int getColor() {
-        return Color;
+    @DatabaseField(canBeNull = false)
+    private String value;
+
+    public Properties(){}
+
+    public String getName() {
+        return name;
     }
 
-    public void setColor(int color) {
-        Color = color;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }

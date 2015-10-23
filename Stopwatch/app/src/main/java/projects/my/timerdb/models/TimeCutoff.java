@@ -7,30 +7,40 @@ import com.j256.ormlite.table.DatabaseTable;
  * Модель отсечек.
  */
 @DatabaseTable
-public class TimeCutoff {
-
-    @DatabaseField(generatedId = true)
-    private int Id;
+public class TimeCutoff extends BaseEntity {
 
     @DatabaseField(foreign = true, canBeNull = false)
-    private TimeManager Manager;
+    private TimeManager manager;
 
     @DatabaseField(canBeNull = false)
-    private String Cutoff;
+    private long cutoff;
+
+    @DatabaseField(index = true)
+    private boolean isTimerState;
+
+    public TimeCutoff() {}
 
     public TimeManager getTimeManager() {
-        return Manager;
+        return manager;
     }
 
     public void setTimeManager(TimeManager manager) {
-        Manager = manager;
+        this.manager = manager;
     }
 
-    public String getCutoff() {
-        return Cutoff;
+    public long getCutoff() {
+        return cutoff;
     }
 
-    public void setCutoff(String cutoff) {
-        Cutoff = cutoff;
+    public void setCutoff(long cutoff) {
+        this.cutoff = cutoff;
+    }
+
+    public boolean isTimerState() {
+        return isTimerState;
+    }
+
+    public void setIsTimerState(boolean isTimerState) {
+        this.isTimerState = isTimerState;
     }
 }
