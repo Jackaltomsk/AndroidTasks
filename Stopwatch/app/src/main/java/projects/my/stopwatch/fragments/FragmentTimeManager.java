@@ -44,4 +44,9 @@ public interface FragmentTimeManager {
      * @return Флаг работы.
      */
     boolean getIsRunning();
+
+    /**
+     * Реализует сохранение времени менеджера в БД.
+     */
+    void saveTimeToDb();
 }

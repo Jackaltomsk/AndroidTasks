@@ -42,7 +42,6 @@ public class CountDownFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -68,7 +67,7 @@ public class CountDownFragment extends Fragment
     public void start() {
         if (service != null) {
             if (!service.getIsTimerRunning()) {
-                long seconds = getTimerTimeSet();
+                long seconds = getTimerTimeMs();
 
                 service.startTimer(seconds);
             }
@@ -127,32 +126,24 @@ public class CountDownFragment extends Fragment
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.save_timer_set: {
-                try {
-                    GenericDao<TimeManager> daoTimeManager = DbManager.getDbContext()
-                            .getGenericDao(TimeManager.class);
-                    TimeManager timer = daoTimeManager.queryBuilder().where().eq(
-                            TimeManager.NAME_FILED, TimeManager.TIMER_NAME).queryForFirst();
-                    TimeCutoff cutoff = new TimeCutoff(getTimerTimeSet(), true);
-                    cutoff.setTimeManager(timer);
-                    GenericDao<TimeCutoff> daoCutoff = DbManager.getDbContext()
-                            .getGenericDao(TimeCutoff.class);
-                    daoCutoff.create(cutoff);
-                } catch (SQLException e) {
-                    Log.e(TAG, "Ошибка добавления установок таймера.");
-                    throw new RuntimeException(e);
-                }
-
-                break;
-            }
-            default: return super.onOptionsItemSelected(item);
+    public void saveTimeToDb() {
+        try {
+            GenericDao<TimeManager> daoTimeManager = DbManager.getDbContext()
+                    .getGenericDao(TimeManager.class);
+            TimeManager timer = daoTimeManager.queryBuilder().where().eq(
+                    TimeManager.NAME_FILED, TimeManager.TIMER_NAME).queryForFirst();
+            TimeCutoff cutoff = new TimeCutoff(getTimerTimeMs(), true);
+            cutoff.setTimeManager(timer);
+            GenericDao<TimeCutoff> daoCutoff = DbManager.getDbContext()
+                    .getGenericDao(TimeCutoff.class);
+            daoCutoff.create(cutoff);
+        } catch (SQLException e) {
+            Log.e(TAG, "Ошибка добавления установок таймера.");
+            throw new RuntimeException(e);
         }
-        return true;
     }
 
-    private long getTimerTimeSet() {
+    private long getTimerTimeMs() {
         EditText edit = (EditText) getActivity().findViewById(R.id.input_countdown_seconds);
         String number = edit.getText().toString();
         long seconds;

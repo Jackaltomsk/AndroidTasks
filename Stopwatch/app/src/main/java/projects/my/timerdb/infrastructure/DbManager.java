@@ -28,6 +28,16 @@ public class DbManager {
     }
 
     /**
+     * Реализует удаление БД
+     * @param context Текущий контекст приложения.
+     * @param name Название БД.
+     * @return
+     */
+    public static boolean deleteDb(Context context, String name) {
+        return context.deleteDatabase(DbContext.DATABASE_NAME);
+    }
+
+    /**
      * Освобождает ресурсы. Вызывать следует в момент закрытия приложения.
      * Если контекст - единый для всего приложения, можно рассмотреть вариант отказа от вызова
      * метода вовсе.

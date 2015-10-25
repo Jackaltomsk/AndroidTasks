@@ -24,7 +24,7 @@ import projects.my.timerdb.models.TimeManager;
 public class DbContext extends OrmLiteSqliteOpenHelper {
 
     private static final String TAG = DbContext.class.getSimpleName();
-    private static final String DATABASE_NAME ="timer.db";
+    public static final String DATABASE_NAME ="timer.db";
     private static final int DATABASE_VERSION = 1;
     private static final Map<Class<? extends BaseEntity>, GenericDao<? extends BaseEntity>>
             daoMap = new HashMap<>();

@@ -114,5 +114,10 @@ public class TimeFragment extends Fragment
         if (service != null) return service.getIsChronometerRunning();
         else return false;
     }
+
+    @Override
+    public void saveTimeToDb() {
+        throw new UnsupportedOperationException("Для хронометра операция не поддерживается");
+    }
 }
 

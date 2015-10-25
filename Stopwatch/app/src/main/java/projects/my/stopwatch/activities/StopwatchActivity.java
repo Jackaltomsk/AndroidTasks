@@ -2,17 +2,15 @@ package projects.my.stopwatch.activities;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.TypedArray;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -23,11 +21,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import projects.my.stopwatch.R;
@@ -36,12 +31,8 @@ import projects.my.stopwatch.fragments.CountDownFragment;
 import projects.my.stopwatch.fragments.FragmentTimeManager;
 import projects.my.stopwatch.fragments.ListviewFragment;
 import projects.my.stopwatch.services.ChronoService;
-import projects.my.stopwatch.fragments.TimeFragment;
 import projects.my.stopwatch.services.ChronoTimerManager;
-import projects.my.timerdb.dao.GenericDao;
-import projects.my.timerdb.infrastructure.DbContext;
 import projects.my.timerdb.infrastructure.DbManager;
-import projects.my.timerdb.models.Properties;
 
 public class StopwatchActivity extends AppCompatActivity
         implements ListviewFragment.OnListActionListener {
@@ -53,6 +44,7 @@ public class StopwatchActivity extends AppCompatActivity
     private ServiceConnection chronoConnection;
     private ChronoService chronoService;
     private MenuItem startStopItem;
+    private MenuItem saveTimerItem;
     private StopwatchPagerAdapter pageAdapter;
     private ViewPager pager;
 
@@ -105,13 +97,21 @@ public class StopwatchActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        boolean isFirstInit = startStopItem == null;
+
         getMenuInflater().inflate(R.menu.menu_stopwatch, menu);
         startStopItem = menu.findItem(R.id.start_counter);
+        saveTimerItem = menu.findItem(R.id.save_timer_set);
         super.onCreateOptionsMenu(menu);
-        if (chronoService != null && currentFragment != null) {
-            stateChanged(currentFragment.getIsRunning());
+
+        // Предотвращение повторного вызова метода при установке во фрагментах
+        // setHasOptionsMenu(true).
+        if (isFirstInit) {
+            if (chronoService != null && currentFragment != null) {
+                stateChanged(currentFragment.getIsRunning());
+            }
+            setupTabs();
         }
-        setupTabs();
         return true;
     }
 
@@ -154,6 +154,9 @@ public class StopwatchActivity extends AppCompatActivity
      */
     private void updateCurrentFragment(int position) {
         currentFragment = (FragmentTimeManager) pageAdapter.getItem(position);
+        if (saveTimerItem != null) {
+            saveTimerItem.setVisible(currentFragment instanceof CountDownFragment);
+        }
     }
 
     /**
@@ -260,6 +263,9 @@ public class StopwatchActivity extends AppCompatActivity
             case R.id.preferences: {
                 throw new UnsupportedOperationException("Окно настроек не реализовано");
                 //break;
+            }
+            case R.id.save_timer_set: {
+                currentFragment.saveTimeToDb();
             }
             default: return super.onOptionsItemSelected(item);
         }
