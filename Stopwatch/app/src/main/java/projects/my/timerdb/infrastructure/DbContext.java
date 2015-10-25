@@ -29,7 +29,7 @@ public class DbContext extends OrmLiteSqliteOpenHelper {
     private static final Map<Class<? extends BaseEntity>, GenericDao<? extends BaseEntity>>
             daoMap = new HashMap<>();
 
-    public DbContext(Context context){
+    public DbContext(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -45,6 +45,7 @@ public class DbContext extends OrmLiteSqliteOpenHelper {
             TableUtils.createTable(connectionSource, Properties.class);
             TableUtils.createTable(connectionSource, TimeManager.class);
             TableUtils.createTable(connectionSource, TimeCutoff.class);
+            createMeta();
         }
         catch (SQLException ex) {
             Log.e(TAG, "Ошибка создания БД " + DATABASE_NAME);
@@ -69,9 +70,9 @@ public class DbContext extends OrmLiteSqliteOpenHelper {
             TableUtils.dropTable(connectionSource, TimeCutoff.class, true);
             onCreate(db, connectionSource);
         }
-        catch (SQLException ex) {
+        catch (SQLException e) {
             Log.e(TAG, "Ошибка обновления БД "+ DATABASE_NAME + " с версии " + oldVer);
-            throw new RuntimeException(ex);
+            throw new RuntimeException(e);
         }
     }
 
@@ -86,10 +87,11 @@ public class DbContext extends OrmLiteSqliteOpenHelper {
         if (dao == null) {
             try {
                 dao = new GenericDao<>(getConnectionSource(), cls);
+                daoMap.put(cls, dao);
             }
-            catch (SQLException ex) {
+            catch (SQLException e) {
                 Log.e(TAG, "Ошибка создания Dao типа " + cls.getSimpleName());
-                throw new RuntimeException(ex);
+                throw new RuntimeException(e);
             }
         }
 
@@ -99,5 +101,37 @@ public class DbContext extends OrmLiteSqliteOpenHelper {
     @Override
     public void close(){
         super.close();
+    }
+
+    /**
+     * Реализует очистку таблиц БД.
+     */
+    public void clearTables() {
+        try {
+            TableUtils.clearTable(getConnectionSource(), Properties.class);
+            TableUtils.clearTable(getConnectionSource(), TimeManager.class);
+            TableUtils.clearTable(getConnectionSource(), TimeCutoff.class);
+        }
+        catch (SQLException ex) {
+            Log.e(TAG, "Ошибка очистки таблиц БД.");
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /**
+     * Реализует заполнение таблицы менеджеров времени предустановленными значениями.
+     */
+    private void createMeta() {
+        GenericDao<TimeManager> dao = getGenericDao(TimeManager.class);
+        TimeManager chrono = new TimeManager(TimeManager.CHRONOMETER_NAME);
+        TimeManager timer = new TimeManager(TimeManager.TIMER_NAME);
+
+        try {
+            dao.create(chrono);
+            dao.create(timer);
+        } catch (SQLException e) {
+            Log.e(TAG, "Ошибка создания в БД предустановок ManagerTime");
+            throw new RuntimeException(e);
+        }
     }
 }

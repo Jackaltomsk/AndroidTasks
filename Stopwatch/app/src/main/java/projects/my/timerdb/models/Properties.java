@@ -1,7 +1,11 @@
 package projects.my.timerdb.models;
 
+import android.graphics.Color;
+
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
+
+import projects.my.timerdb.dao.GenericDao;
 
 /**
  * Модель основных свойств приложения.
@@ -9,16 +13,20 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable()
 public class Properties extends BaseEntity {
 
-    @DatabaseField(canBeNull = false)
-    private String name;
+    public static final String COLOR = "color";
 
-    @DatabaseField(canBeNull = false)
-    private String type;
+    @DatabaseField(canBeNull = false, unique = true)
+    private String name;
 
     @DatabaseField(canBeNull = false)
     private String value;
 
     public Properties(){}
+
+    public Properties(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
 
     public String getName() {
         return name;
@@ -26,14 +34,6 @@ public class Properties extends BaseEntity {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getValue() {

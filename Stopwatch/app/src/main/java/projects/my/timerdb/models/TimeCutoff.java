@@ -20,6 +20,11 @@ public class TimeCutoff extends BaseEntity {
 
     public TimeCutoff() {}
 
+    public TimeCutoff(long cutoff, boolean isTimerState) {
+        this.cutoff = cutoff;
+        this.isTimerState = isTimerState;
+    }
+
     public TimeManager getTimeManager() {
         return manager;
     }

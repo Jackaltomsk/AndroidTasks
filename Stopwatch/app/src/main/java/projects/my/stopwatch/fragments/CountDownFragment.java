@@ -1,24 +1,27 @@
 package projects.my.stopwatch.fragments;
 
 import android.app.Fragment;
-import android.content.res.TypedArray;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import java.sql.SQLException;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.activities.StopwatchActivity;
 import projects.my.stopwatch.common.Time;
 import projects.my.stopwatch.services.ChronoTimerManager;
 import projects.my.stopwatch.services.ChronometerTimerTick;
-import projects.my.stopwatch.services.ManageChronometer;
 import projects.my.stopwatch.services.ManageTimer;
+import projects.my.timerdb.dao.GenericDao;
+import projects.my.timerdb.infrastructure.DbManager;
+import projects.my.timerdb.models.TimeCutoff;
+import projects.my.timerdb.models.TimeManager;
 
 /**
  * Фрагмент, отображающий результат работы таймера (отсчет до нуля).
@@ -26,6 +29,7 @@ import projects.my.stopwatch.services.ManageTimer;
 public class CountDownFragment extends Fragment
     implements StopwatchActivity.ChronoConnectedListener, FragmentTimeManager {
 
+    private static final String TAG = CountDownFragment.class.getSimpleName();
     private static final String TITLE = "TIMER";
     private ManageTimer service;
     private TextView timerTime;
@@ -38,6 +42,7 @@ public class CountDownFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -63,15 +68,7 @@ public class CountDownFragment extends Fragment
     public void start() {
         if (service != null) {
             if (!service.getIsTimerRunning()) {
-                EditText edit = (EditText) getActivity().findViewById(R.id.input_countdown_seconds);
-                String number = edit.getText().toString();
-                long seconds;
-                try {
-                    seconds = Long.parseLong(number);
-                }
-                catch (NumberFormatException ex) {
-                    seconds = 0;
-                }
+                long seconds = getTimerTimeSet();
 
                 service.startTimer(seconds);
             }
@@ -128,4 +125,45 @@ public class CountDownFragment extends Fragment
         if (service != null) return service.getIsTimerRunning();
         else return false;
     }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.save_timer_set: {
+                try {
+                    GenericDao<TimeManager> daoTimeManager = DbManager.getDbContext()
+                            .getGenericDao(TimeManager.class);
+                    TimeManager timer = daoTimeManager.queryBuilder().where().eq(
+                            TimeManager.NAME_FILED, TimeManager.TIMER_NAME).queryForFirst();
+                    TimeCutoff cutoff = new TimeCutoff(getTimerTimeSet(), true);
+                    cutoff.setTimeManager(timer);
+                    GenericDao<TimeCutoff> daoCutoff = DbManager.getDbContext()
+                            .getGenericDao(TimeCutoff.class);
+                    daoCutoff.create(cutoff);
+                } catch (SQLException e) {
+                    Log.e(TAG, "Ошибка добавления установок таймера.");
+                    throw new RuntimeException(e);
+                }
+
+                break;
+            }
+            default: return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+
+    private long getTimerTimeSet() {
+        EditText edit = (EditText) getActivity().findViewById(R.id.input_countdown_seconds);
+        String number = edit.getText().toString();
+        long seconds;
+        try {
+            seconds = Long.parseLong(number);
+        }
+        catch (NumberFormatException ex) {
+            Log.e(TAG, "Не распарсено значение " + number);
+            seconds = 0;
+        }
+        return seconds;
+    }
+
 }

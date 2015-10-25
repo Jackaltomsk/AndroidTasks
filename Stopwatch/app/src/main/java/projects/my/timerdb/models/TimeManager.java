@@ -12,8 +12,11 @@ import java.util.Collection;
  */
 @DatabaseTable()
 public class TimeManager extends BaseEntity {
+    public static final String CHRONOMETER_NAME = "chronometer";
+    public static final String TIMER_NAME = "timer";
+    public static final String NAME_FILED = "name";
 
-    @DatabaseField(canBeNull = false)
+    @DatabaseField(columnName = NAME_FILED ,canBeNull = false, unique = true)
     private String name;
 
     @ForeignCollectionField(eager = true)
@@ -21,6 +24,11 @@ public class TimeManager extends BaseEntity {
 
     public TimeManager() {
         cutoffs = new ArrayList<>();
+    }
+
+    public TimeManager(String name) {
+        this();
+        this.setName(name);
     }
 
     public String getName() {

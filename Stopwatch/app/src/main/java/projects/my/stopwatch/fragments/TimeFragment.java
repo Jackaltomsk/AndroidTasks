@@ -1,9 +1,5 @@
 package projects.my.stopwatch.fragments;
 
-import android.content.res.TypedArray;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.app.Fragment;
 import android.view.LayoutInflater;

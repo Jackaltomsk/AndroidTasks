@@ -23,9 +23,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import projects.my.stopwatch.R;
@@ -76,8 +78,9 @@ public class StopwatchActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Создаем контекст единожды и для всего приложения.
+        // Уничтожать его явно смысла нет - учечка памяти ничтожна и будет ликвидирована
+        // по закрытии приложения.
         if (!DbManager.isContextSet()) DbManager.setDbContext(getApplicationContext());
-        GenericDao<Properties> dao = DbManager.getDbContext().getGenericDao(Properties.class);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stopwatch);
@@ -254,8 +257,13 @@ public class StopwatchActivity extends AppCompatActivity
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivityForResult(intent, REQUEST_COLOR_CODE);
                 break;
+            case R.id.preferences: {
+                throw new UnsupportedOperationException("Окно настроек не реализовано");
+                //break;
+            }
+            default: return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+        return true;
     }
 
     @Override
