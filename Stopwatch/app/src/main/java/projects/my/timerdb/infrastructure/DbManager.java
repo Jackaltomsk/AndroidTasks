@@ -11,6 +11,10 @@ public class DbManager {
 
     private static DbContext context;
 
+    public static boolean isContextSet() {
+        return context != null;
+    }
+
     public static DbContext getDbContext(){
         return context;
     }

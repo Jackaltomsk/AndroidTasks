@@ -36,6 +36,10 @@ import projects.my.stopwatch.fragments.ListviewFragment;
 import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.fragments.TimeFragment;
 import projects.my.stopwatch.services.ChronoTimerManager;
+import projects.my.timerdb.dao.GenericDao;
+import projects.my.timerdb.infrastructure.DbContext;
+import projects.my.timerdb.infrastructure.DbManager;
+import projects.my.timerdb.models.Properties;
 
 public class StopwatchActivity extends AppCompatActivity
         implements ListviewFragment.OnListActionListener {
@@ -71,6 +75,10 @@ public class StopwatchActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Создаем контекст единожды и для всего приложения.
+        if (!DbManager.isContextSet()) DbManager.setDbContext(getApplicationContext());
+        GenericDao<Properties> dao = DbManager.getDbContext().getGenericDao(Properties.class);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stopwatch);
         initViewPager();
