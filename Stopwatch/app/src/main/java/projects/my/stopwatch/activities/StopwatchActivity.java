@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.IBinder;
+import android.preference.PreferenceFragment;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -30,6 +31,7 @@ import projects.my.stopwatch.adapters.StopwatchPagerAdapter;
 import projects.my.stopwatch.fragments.CountDownFragment;
 import projects.my.stopwatch.fragments.FragmentTimeManager;
 import projects.my.stopwatch.fragments.ListviewFragment;
+import projects.my.stopwatch.fragments.PreferencesFragment;
 import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.services.ChronoTimerManager;
 import projects.my.timerdb.infrastructure.DbManager;
@@ -261,8 +263,10 @@ public class StopwatchActivity extends AppCompatActivity
                 startActivityForResult(intent, REQUEST_COLOR_CODE);
                 break;
             case R.id.preferences: {
-                throw new UnsupportedOperationException("Окно настроек не реализовано");
-                //break;
+                PreferenceFragment pf = new PreferencesFragment();
+
+                //throw new UnsupportedOperationException("Окно настроек не реализовано");
+                break;
             }
             case R.id.save_timer_set: {
                 currentFragment.saveTimeToDb();
