@@ -4,13 +4,10 @@ import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
-
-import java.sql.SQLException;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.activities.StopwatchActivity;
@@ -18,10 +15,6 @@ import projects.my.stopwatch.common.Time;
 import projects.my.stopwatch.services.ChronoTimerManager;
 import projects.my.stopwatch.services.ChronometerTimerTick;
 import projects.my.stopwatch.services.ManageTimer;
-import projects.my.timerdb.dao.GenericDao;
-import projects.my.timerdb.infrastructure.DbManager;
-import projects.my.timerdb.models.TimeCutoff;
-import projects.my.timerdb.models.TimeManager;
 
 /**
  * Фрагмент, отображающий результат работы таймера (отсчет до нуля).
@@ -67,7 +60,7 @@ public class CountDownFragment extends Fragment
     public void start() {
         if (service != null) {
             if (!service.getIsTimerRunning()) {
-                long seconds = getTimerTimeMs();
+                long seconds = Time.milsToSeconds(getTimeSet());
 
                 service.startTimer(seconds);
             }
@@ -126,35 +119,17 @@ public class CountDownFragment extends Fragment
     }
 
     @Override
-    public void saveTimeToDb() {
-        try {
-            GenericDao<TimeManager> daoTimeManager = DbManager.getDbContext()
-                    .getGenericDao(TimeManager.class);
-            TimeManager timer = daoTimeManager.queryBuilder().where().eq(
-                    TimeManager.NAME_FILED, TimeManager.TIMER_NAME).queryForFirst();
-            TimeCutoff cutoff = new TimeCutoff(getTimerTimeMs(), true);
-            cutoff.setTimeManager(timer);
-            GenericDao<TimeCutoff> daoCutoff = DbManager.getDbContext()
-                    .getGenericDao(TimeCutoff.class);
-            daoCutoff.create(cutoff);
-        } catch (SQLException e) {
-            Log.e(TAG, "Ошибка добавления установок таймера.");
-            throw new RuntimeException(e);
-        }
-    }
-
-    private long getTimerTimeMs() {
+    public long getTimeSet() {
         EditText edit = (EditText) getActivity().findViewById(R.id.input_countdown_seconds);
         String number = edit.getText().toString();
-        long seconds;
+        long ms;
         try {
-            seconds = Long.parseLong(number);
+            ms = Long.parseLong(number) * Time.ONE_SECOND;
         }
         catch (NumberFormatException ex) {
             Log.e(TAG, "Не распарсено значение " + number);
-            seconds = 0;
+            ms = 0;
         }
-        return seconds;
+        return ms;
     }
-
 }

@@ -46,7 +46,7 @@ public interface FragmentTimeManager {
     boolean getIsRunning();
 
     /**
-     * Реализует сохранение времени менеджера в БД.
+     * Реализует получение текущих установок времени. Актуально для таймера.
      */
-    void saveTimeToDb();
+    long getTimeSet();
 }

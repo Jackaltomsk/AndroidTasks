@@ -116,7 +116,7 @@ public class TimeFragment extends Fragment
     }
 
     @Override
-    public void saveTimeToDb() {
+    public long getTimeSet() {
         throw new UnsupportedOperationException("Для хронометра операция не поддерживается");
     }
 }

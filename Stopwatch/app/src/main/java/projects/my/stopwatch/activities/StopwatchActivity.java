@@ -6,22 +6,22 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.res.TypedArray;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.IBinder;
-import android.preference.PreferenceFragment;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,13 +31,17 @@ import projects.my.stopwatch.adapters.StopwatchPagerAdapter;
 import projects.my.stopwatch.fragments.CountDownFragment;
 import projects.my.stopwatch.fragments.FragmentTimeManager;
 import projects.my.stopwatch.fragments.ListviewFragment;
-import projects.my.stopwatch.fragments.PreferencesFragment;
 import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.services.ChronoTimerManager;
+import projects.my.timerdb.dao.GenericDao;
 import projects.my.timerdb.infrastructure.DbManager;
+import projects.my.timerdb.models.TimeCutoff;
+import projects.my.timerdb.models.TimeManager;
 
 public class StopwatchActivity extends AppCompatActivity
         implements ListviewFragment.OnListActionListener {
+
+    private static final String TAG = StopwatchActivity.class.getSimpleName();
     private static final int REQUEST_COLOR_CODE = 1;
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private boolean bound;
@@ -259,17 +263,16 @@ public class StopwatchActivity extends AppCompatActivity
                 stateChanged(false);
                 break;
             case R.id.settings:
-                Intent intent = new Intent(this, SettingsActivity.class);
+                Intent intent = new Intent(this, ColorActivity.class);
                 startActivityForResult(intent, REQUEST_COLOR_CODE);
                 break;
             case R.id.preferences: {
-                PreferenceFragment pf = new PreferencesFragment();
-
-                //throw new UnsupportedOperationException("Окно настроек не реализовано");
+                Intent prefIntent = new Intent(this, PreferencesActivity.class);
+                startActivity(prefIntent);
                 break;
             }
             case R.id.save_timer_set: {
-                currentFragment.saveTimeToDb();
+                saveTimeToDb(currentFragment);
             }
             default: return super.onOptionsItemSelected(item);
         }
@@ -280,7 +283,7 @@ public class StopwatchActivity extends AppCompatActivity
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_COLOR_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                int colorId = data.getIntExtra("color", android.R.color.white);
+                int colorId = data.getIntExtra(ColorActivity.COLOR, android.R.color.white);
                 handleBackgroundColorChange(new ColorDrawable(colorId));
             }
             if (resultCode == Activity.RESULT_CANCELED) {
@@ -343,5 +346,22 @@ public class StopwatchActivity extends AppCompatActivity
         td = new TransitionDrawable(colors);
         mainContainer.setBackground(td);
         td.startTransition(2000);
+    }
+
+    private void saveTimeToDb(FragmentTimeManager manager) {
+        try {
+            GenericDao<TimeManager> daoTimeManager = DbManager.getDbContext()
+                    .getGenericDao(TimeManager.class);
+            TimeManager timer = daoTimeManager.queryBuilder().where().eq(
+                    TimeManager.NAME_FILED, TimeManager.TIMER_NAME).queryForFirst();
+            TimeCutoff cutoff = new TimeCutoff(manager.getTimeSet(), true);
+            cutoff.setTimeManager(timer);
+            GenericDao<TimeCutoff> daoCutoff = DbManager.getDbContext()
+                    .getGenericDao(TimeCutoff.class);
+            daoCutoff.create(cutoff);
+        } catch (SQLException e) {
+            Log.e(TAG, "Ошибка добавления установок таймера.");
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
@@ -13,14 +14,16 @@ import java.util.Random;
 
 import projects.my.stopwatch.R;
 
-public class SettingsActivity extends AppCompatActivity {
+public class ColorActivity extends AppCompatActivity {
+
+    public final static String COLOR = "color";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        GridLayout grid = (GridLayout) findViewById(R.id.color_grid);
-        fillGridWithColors(grid);
+        setToolbar();
+        fillGridWithColors();
     }
 
     /**
@@ -34,23 +37,22 @@ public class SettingsActivity extends AppCompatActivity {
 
         int color = ((ColorDrawable) btn.getBackground()).getColor();
         Intent returnIntent = new Intent();
-        returnIntent.putExtra("color", color);
+        returnIntent.putExtra(COLOR, color);
         setResult(RESULT_OK, returnIntent);
         finish();
     }
 
     /**
      * Реализует заполнение гридп кнопками-цветами.
-     * @param grid Грид.
      */
-    private void fillGridWithColors(GridLayout grid) {
+    private void fillGridWithColors() {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 handleImageViewClick(v);
             }
         };
-
+        GridLayout grid = (GridLayout) findViewById(R.id.color_grid);
         int elementsCount = grid.getColumnCount() * grid.getRowCount();
         for (int element = 0; element < elementsCount; element++ ) {
             Random rnd = new Random();
@@ -60,5 +62,13 @@ public class SettingsActivity extends AppCompatActivity {
             view.setBackgroundColor(color);
             grid.addView(view);
         }
+    }
+
+    /**
+     * Реализует инициализацию тулбара.
+     */
+    private void setToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 }
