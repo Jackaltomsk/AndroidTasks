@@ -17,12 +17,13 @@
     <string name="label_for_input_time">Время таймера (в секундах):</string>
     <string name="preferences_action">Настройки</string>
     <string name="save_timer_set">Сохранить время</string>
+    <string name="show_timer_sets">Показать сохраненное время</string>
 
     <!-- Окно настроек-->
     <string name="pref_save_time_title">Сохранять отсечки таймера</string>
     <string name="pref_save_color_title">Применить цвет</string>
     <string name="pref_save_color_title_sum">Применять выбранный цвет фона при запуске
-        приложения</string>
+        приложения(требуется перезапуск)</string>
     <string name="pref_select_color_title">Выбрать цвет</string>
     <string name="pref_key_save_time">key_savetime</string>
     <string name="pref_key_save_color">key_savecolor</string>

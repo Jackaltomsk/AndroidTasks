@@ -7,6 +7,8 @@
         app:showAsAction="never" />
     <item android:id="@+id/save_timer_set" android:title="@string/save_timer_set"
         app:showAsAction="ifRoom" android:visible="false" />
+    <item android:id="@+id/show_timer_sets" android:title="@string/show_timer_sets"
+        app:showAsAction="never" android:visible="false" />
     <item android:id="@+id/preferences" android:title="@string/preferences_action"
         app:showAsAction="never" />
     <item android:id="@+id/settings" android:title="@string/chronometer_color_settings"

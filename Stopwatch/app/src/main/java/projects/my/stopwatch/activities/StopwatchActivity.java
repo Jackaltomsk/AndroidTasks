@@ -11,6 +11,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -35,7 +36,9 @@ import projects.my.stopwatch.fragments.ListviewFragment;
 import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.services.ChronoTimerManager;
 import projects.my.timerdb.dao.GenericDao;
+import projects.my.timerdb.dao.extensions.PropertiesExtension;
 import projects.my.timerdb.infrastructure.DbManager;
+import projects.my.timerdb.models.Properties;
 import projects.my.timerdb.models.TimeCutoff;
 import projects.my.timerdb.models.TimeManager;
 
@@ -51,6 +54,7 @@ public class StopwatchActivity extends AppCompatActivity
     private ChronoService chronoService;
     private MenuItem startStopItem;
     private MenuItem saveTimerItem;
+    private MenuItem showTimerItem;
     private StopwatchPagerAdapter pageAdapter;
     private ViewPager pager;
 
@@ -108,6 +112,7 @@ public class StopwatchActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.menu_stopwatch, menu);
         startStopItem = menu.findItem(R.id.start_counter);
         saveTimerItem = menu.findItem(R.id.save_timer_set);
+        showTimerItem = menu.findItem(R.id.show_timer_sets);
         super.onCreateOptionsMenu(menu);
 
         // Предотвращение повторного вызова метода при установке во фрагментах
@@ -162,6 +167,9 @@ public class StopwatchActivity extends AppCompatActivity
         currentFragment = (FragmentTimeManager) pageAdapter.getItem(position);
         if (saveTimerItem != null) {
             saveTimerItem.setVisible(currentFragment instanceof CountDownFragment);
+        }
+        if (showTimerItem != null) {
+            showTimerItem.setVisible(currentFragment instanceof CountDownFragment);
         }
     }
 
@@ -274,6 +282,10 @@ public class StopwatchActivity extends AppCompatActivity
             case R.id.save_timer_set: {
                 saveTimeToDb(currentFragment);
             }
+            case R.id.show_timer_sets: {
+                // TODO: Отобразить фрагмент со списком значений.
+                //saveTimeToDb(currentFragment);
+            }
             default: return super.onOptionsItemSelected(item);
         }
         return true;
@@ -313,11 +325,23 @@ public class StopwatchActivity extends AppCompatActivity
             backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
         }
         else {
-            //SharedPreferences prefs = PreferenceManager()
-            TypedArray typedArray = getTheme().
-                    obtainStyledAttributes(new int[]{android.R.attr.background});
-            backgroundColor = typedArray.getColor(0, 0xFF00FF);
-            typedArray.recycle();
+            // Определим, брать ли цвет стандартный цвет фона или обращаться за ним к БД.
+            Integer color = null;
+            SharedPreferences prefs = PreferenceManager
+                    .getDefaultSharedPreferences(getApplicationContext());
+            if (prefs.getBoolean(getResources().getString(R.string.pref_key_save_color), false)) {
+                GenericDao<Properties> propsDao = DbManager.getDbContext()
+                        .getGenericDao(Properties.class);
+                PropertiesExtension ext = new PropertiesExtension(propsDao);
+                color = ext.getColor();
+            }
+            if (color == null) {
+                TypedArray typedArray = getTheme().
+                        obtainStyledAttributes(new int[]{android.R.attr.background});
+                backgroundColor = typedArray.getColor(0, 0xFF00FF);
+                typedArray.recycle();
+            }
+            else backgroundColor = color;
         }
 
         View mainContainer = findViewById(R.id.stopwatch_main_container);
