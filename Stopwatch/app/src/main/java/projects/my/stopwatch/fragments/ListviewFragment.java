@@ -85,5 +85,4 @@ public class ListviewFragment extends Fragment {
                 R.id.textItem, listItems);
         list.setAdapter(adapter);
     }
-
 }
