@@ -17,6 +17,7 @@ import projects.my.stopwatch.R;
 public class ColorActivity extends AppCompatActivity {
 
     public final static String COLOR = "color";
+    public final static int REQUEST_COLOR_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

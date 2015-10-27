@@ -5,6 +5,7 @@ import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -42,7 +43,6 @@ public class StopwatchActivity extends AppCompatActivity
         implements ListviewFragment.OnListActionListener {
 
     private static final String TAG = StopwatchActivity.class.getSimpleName();
-    private static final int REQUEST_COLOR_CODE = 1;
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private boolean bound;
     private int backgroundColor;
@@ -264,7 +264,7 @@ public class StopwatchActivity extends AppCompatActivity
                 break;
             case R.id.settings:
                 Intent intent = new Intent(this, ColorActivity.class);
-                startActivityForResult(intent, REQUEST_COLOR_CODE);
+                startActivityForResult(intent, ColorActivity.REQUEST_COLOR_CODE);
                 break;
             case R.id.preferences: {
                 Intent prefIntent = new Intent(this, PreferencesActivity.class);
@@ -281,7 +281,7 @@ public class StopwatchActivity extends AppCompatActivity
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_COLOR_CODE) {
+        if (requestCode == ColorActivity.REQUEST_COLOR_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 int colorId = data.getIntExtra(ColorActivity.COLOR, android.R.color.white);
                 handleBackgroundColorChange(new ColorDrawable(colorId));
@@ -291,6 +291,7 @@ public class StopwatchActivity extends AppCompatActivity
                 tst.show();
             }
         }
+        else super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**
@@ -312,6 +313,7 @@ public class StopwatchActivity extends AppCompatActivity
             backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
         }
         else {
+            //SharedPreferences prefs = PreferenceManager()
             TypedArray typedArray = getTheme().
                     obtainStyledAttributes(new int[]{android.R.attr.background});
             backgroundColor = typedArray.getColor(0, 0xFF00FF);

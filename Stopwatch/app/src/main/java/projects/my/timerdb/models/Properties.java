@@ -14,8 +14,9 @@ import projects.my.timerdb.dao.GenericDao;
 public class Properties extends BaseEntity {
 
     public static final String COLOR = "color";
+    public static final String NAME_FIELD = "name";
 
-    @DatabaseField(canBeNull = false, unique = true)
+    @DatabaseField(columnName = NAME_FIELD, canBeNull = false, unique = true)
     private String name;
 
     @DatabaseField(canBeNull = false)

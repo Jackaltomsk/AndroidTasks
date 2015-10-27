@@ -1,9 +1,10 @@
 <resources>
-<!--Названия активити-->
+    <!--Названия активити-->
     <string name="app_name">Stopwatch</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="title_activitiy_preferences">Preferences</string>
-<!--Остальное-->
+
+    <!--Остальное-->
     <string name="menu_drop_counter_title">Сбросить</string>
     <string name="menu_start_counter_title">Запустить</string>
     <string name="menu_stop_counter_title">Остановить</string>
@@ -16,7 +17,14 @@
     <string name="label_for_input_time">Время таймера (в секундах):</string>
     <string name="preferences_action">Настройки</string>
     <string name="save_timer_set">Сохранить время</string>
-<!-- Окно настроек-->
+
+    <!-- Окно настроек-->
     <string name="pref_save_time_title">Сохранять отсечки таймера</string>
+    <string name="pref_save_color_title">Применить цвет</string>
+    <string name="pref_save_color_title_sum">Применять выбранный цвет фона при запуске
+        приложения</string>
     <string name="pref_select_color_title">Выбрать цвет</string>
+    <string name="pref_key_save_time">key_savetime</string>
+    <string name="pref_key_save_color">key_savecolor</string>
+    <string name="pref_key_select_color">key_selectcolor</string>
 </resources>
