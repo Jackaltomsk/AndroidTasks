@@ -3,6 +3,6 @@
     <CheckBoxPreference android:title="@string/pref_save_time_title" android:key="stt"
         android:defaultValue="false" />
     <Preference android:title="@string/pref_select_color_title" >
-        <intent android:action="projects.my.activities.SettingsActivity" />
+        <intent />
     </Preference>
 </PreferenceScreen>

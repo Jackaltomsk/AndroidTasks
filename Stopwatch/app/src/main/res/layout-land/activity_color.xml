@@ -4,7 +4,11 @@
     android:id="@+id/settings_layout"
     android:layout_height="match_parent"
     tools:context="projects.my.stopwatch.activities.ColorActivity">
-    <include layout="@layout/toolbar" />
+    <include layout="@layout/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/color_grid" />
     <GridLayout
         android:id="@+id/color_grid"
         android:paddingLeft="@dimen/activity_horizontal_margin"

@@ -13,7 +13,16 @@ public class PreferencesActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
-        getFragmentManager().beginTransaction().replace(android.R.id.content,
+        setToolbar();
+        getFragmentManager().beginTransaction().replace(R.id.pref_content,
                 new PreferencesFragment()).commit();
+    }
+
+    /**
+     * Реализует инициализацию тулбара.
+     */
+    private void setToolbar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
     }
 }
