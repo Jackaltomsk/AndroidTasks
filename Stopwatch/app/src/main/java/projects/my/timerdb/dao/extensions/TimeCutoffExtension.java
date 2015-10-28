@@ -11,7 +11,7 @@ import projects.my.timerdb.dao.GenericDao;
 import projects.my.timerdb.models.TimeCutoff;
 
 /**
- * Методы работы с отчечками.
+ * Методы работы с отсечками.
  */
 public class TimeCutoffExtension extends BaseExtension<TimeCutoff> {
 
@@ -36,7 +36,7 @@ public class TimeCutoffExtension extends BaseExtension<TimeCutoff> {
             return timeValues;
         }
         catch (SQLException e) {
-            Log.e(TAG, "Ошибка сохранения цвета в БД");
+            Log.e(TAG, "Ошибка получения сохраненных таймеров");
         }
         return new long[0];
     }
