@@ -9,13 +9,15 @@ import com.j256.ormlite.table.DatabaseTable;
 @DatabaseTable
 public class TimeCutoff extends BaseEntity {
 
+    public final static String ISTIMERSTATE_FIELD = "isTimerState";
+
     @DatabaseField(foreign = true, canBeNull = false)
     private TimeManager manager;
 
     @DatabaseField(canBeNull = false)
     private long cutoff;
 
-    @DatabaseField(index = true)
+    @DatabaseField(columnName = ISTIMERSTATE_FIELD, index = true)
     private boolean isTimerState;
 
     public TimeCutoff() {}

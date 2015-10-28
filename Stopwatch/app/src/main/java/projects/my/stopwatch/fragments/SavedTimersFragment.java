@@ -22,30 +22,29 @@ public class SavedTimersFragment extends DialogFragment {
     private ArrayAdapter<String> adapter;
     private ListView list;
 
-    // TODO: Rename and change types of parameters
-    public static SavedTimersFragment newInstance(String param1, String param2) {
-        SavedTimersFragment fragment = new SavedTimersFragment();
-        return fragment;
-    }
-
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
     public SavedTimersFragment() {
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        createListAdapter(savedInstanceState);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.saved_timers_fragment, container);
+        list = (ListView) view.findViewById(R.id.time_listView);
+        createListAdapter(savedInstanceState);
+        // Устанавливаем анимацию.
+        getDialog().getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
         return view;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putStringArrayList(TIME_LIST, listItems);
     }
 
     public void setAdapterContents(String[] values) {

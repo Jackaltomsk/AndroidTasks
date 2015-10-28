@@ -33,10 +33,12 @@ import projects.my.stopwatch.adapters.StopwatchPagerAdapter;
 import projects.my.stopwatch.fragments.CountDownFragment;
 import projects.my.stopwatch.fragments.FragmentTimeManager;
 import projects.my.stopwatch.fragments.ListviewFragment;
+import projects.my.stopwatch.fragments.SavedTimersFragment;
 import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.services.ChronoTimerManager;
 import projects.my.timerdb.dao.GenericDao;
 import projects.my.timerdb.dao.extensions.PropertiesExtension;
+import projects.my.timerdb.dao.extensions.TimeCutoffExtension;
 import projects.my.timerdb.infrastructure.DbManager;
 import projects.my.timerdb.models.Properties;
 import projects.my.timerdb.models.TimeCutoff;
@@ -281,10 +283,17 @@ public class StopwatchActivity extends AppCompatActivity
             }
             case R.id.save_timer_set: {
                 saveTimeToDb(currentFragment);
+                break;
             }
             case R.id.show_timer_sets: {
-                // TODO: Отобразить фрагмент со списком значений.
-                //saveTimeToDb(currentFragment);
+                GenericDao<TimeCutoff> dao = DbManager.getDbContext()
+                        .getGenericDao(TimeCutoff.class);
+                TimeCutoffExtension ext = new TimeCutoffExtension(dao);
+                long[] time = ext.getSavedTimers();
+
+                SavedTimersFragment fr = new SavedTimersFragment();
+                fr.show(getFragmentManager(), "tg");
+                break;
             }
             default: return super.onOptionsItemSelected(item);
         }
