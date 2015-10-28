@@ -30,6 +30,7 @@ import java.util.List;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.adapters.StopwatchPagerAdapter;
+import projects.my.stopwatch.common.Time;
 import projects.my.stopwatch.fragments.CountDownFragment;
 import projects.my.stopwatch.fragments.FragmentTimeManager;
 import projects.my.stopwatch.fragments.ListviewFragment;
@@ -286,13 +287,7 @@ public class StopwatchActivity extends AppCompatActivity
                 break;
             }
             case R.id.show_timer_sets: {
-                GenericDao<TimeCutoff> dao = DbManager.getDbContext()
-                        .getGenericDao(TimeCutoff.class);
-                TimeCutoffExtension ext = new TimeCutoffExtension(dao);
-                long[] time = ext.getSavedTimers();
-
-                SavedTimersFragment fr = new SavedTimersFragment();
-                fr.show(getFragmentManager(), "tg");
+                showSavedTimerDialog();
                 break;
             }
             default: return super.onOptionsItemSelected(item);
@@ -394,9 +389,28 @@ public class StopwatchActivity extends AppCompatActivity
             GenericDao<TimeCutoff> daoCutoff = DbManager.getDbContext()
                     .getGenericDao(TimeCutoff.class);
             daoCutoff.create(cutoff);
+            Toast.makeText(this, "Таймер сохранен в БД", Toast.LENGTH_SHORT).show();
         } catch (SQLException e) {
             Log.e(TAG, "Ошибка добавления установок таймера.");
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Реализует отображение фрагмента с сохраненными таймерами.
+     */
+    private void showSavedTimerDialog() {
+        GenericDao<TimeCutoff> dao = DbManager.getDbContext()
+                .getGenericDao(TimeCutoff.class);
+        TimeCutoffExtension ext = new TimeCutoffExtension(dao);
+        long[] time = ext.getSavedTimers();
+        ArrayList<String> stringedTime = new ArrayList<>(time.length);
+        for (int i = 0; i < time.length; i++) {
+            stringedTime.add(Time.formatElapsedTime(time[i]));
+        }
+
+        SavedTimersFragment fr = new SavedTimersFragment();
+        fr.show(getFragmentManager(), "tg");
+        fr.setAdapterContents(stringedTime);
     }
 }

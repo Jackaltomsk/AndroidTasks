@@ -18,6 +18,7 @@
     <string name="preferences_action">Настройки</string>
     <string name="save_timer_set">Сохранить время</string>
     <string name="show_timer_sets">Показать сохраненное время</string>
+    <string name="saved_timer_dialog_title">Таймеры</string>
 
     <!-- Окно настроек-->
     <string name="pref_save_time_title">Сохранять отсечки таймера</string>
