@@ -38,10 +38,8 @@ import projects.my.stopwatch.fragments.SavedTimersFragment;
 import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.services.ChronoTimerManager;
 import projects.my.timerdb.dao.GenericDao;
-import projects.my.timerdb.dao.extensions.PropertiesExtension;
 import projects.my.timerdb.dao.extensions.TimeCutoffExtension;
 import projects.my.timerdb.infrastructure.DbManager;
-import projects.my.timerdb.models.Properties;
 import projects.my.timerdb.models.TimeCutoff;
 import projects.my.timerdb.models.TimeManager;
 
@@ -77,7 +75,7 @@ public class StopwatchActivity extends AppCompatActivity
 
     @Override
     public boolean canAddItemText() {
-        return currentFragment.getIsRunning();
+        return currentFragment.isRunning();
     }
 
     @Override
@@ -126,7 +124,7 @@ public class StopwatchActivity extends AppCompatActivity
         // setHasOptionsMenu(true).
         if (startStopItem == null) {
             if (chronoService != null && currentFragment != null) {
-                stateChanged(currentFragment.getIsRunning());
+                stateChanged(currentFragment.isRunning());
             }
             setupTabs();
         }
@@ -150,18 +148,16 @@ public class StopwatchActivity extends AppCompatActivity
             public void onTabSelected(TabLayout.Tab tab) {
                 int position = tab.getPosition();
                 updateCurrentFragment(position);
-                stateChanged(currentFragment.getIsRunning());
+                stateChanged(currentFragment.isRunning());
                 pager.setCurrentItem(position);
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {
-                return;
             }
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-                return;
             }
         });
     }
@@ -204,12 +200,11 @@ public class StopwatchActivity extends AppCompatActivity
             @Override
             public void onPageSelected(int position) {
                 updateCurrentFragment(position);
-                stateChanged(currentFragment.getIsRunning());
+                stateChanged(currentFragment.isRunning());
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
-                return;
             }
         });
     }
@@ -255,14 +250,14 @@ public class StopwatchActivity extends AppCompatActivity
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.start_counter:
-                if (!currentFragment.getIsRunning()) {
+                if (!currentFragment.isRunning()) {
                     // Останавливаем все работающие хронометры/таймеры, кроме текущего.
                     List<Fragment> af = new ArrayList<>();
                     Collections.addAll(af, pageAdapter.getFragments());
                     af.remove(currentFragment);
                     for (Fragment fr : af) {
                         FragmentTimeManager frt = (FragmentTimeManager) fr;
-                        if (frt.getIsRunning()) frt.stop();
+                        if (frt.isRunning()) frt.stop();
                     }
 
                     currentFragment.start();

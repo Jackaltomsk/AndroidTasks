@@ -55,6 +55,7 @@ public class ListviewFragment extends Fragment {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {

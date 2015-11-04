@@ -30,7 +30,7 @@ public interface ManageTimer extends ChronoTimerManager {
      * Реализует получение текущего статуса таймера.
      * @return Возвращает флаг работы таймера.
      */
-    boolean getIsTimerRunning();
+    boolean isTimerRunning();
 
     /**
      * Реализует получение текущего времени таймера.

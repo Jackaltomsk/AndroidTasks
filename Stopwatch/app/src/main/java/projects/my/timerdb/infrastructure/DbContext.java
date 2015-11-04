@@ -82,6 +82,7 @@ public class DbContext extends OrmLiteSqliteOpenHelper {
      * @param <T> Тип модели БД.
      * @return Возвращает репозиторий запрошенного типа.
      */
+    @SuppressWarnings("unchecked")
     public synchronized <T extends BaseEntity> GenericDao<T> getGenericDao(Class<T> cls) {
         GenericDao<T> dao = (GenericDao<T>) daoMap.get(cls);
         if (dao == null) {

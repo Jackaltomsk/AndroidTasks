@@ -46,8 +46,7 @@ public class PropertiesExtension extends BaseExtension<Properties> {
         Properties props = getColorProperty();
         if (props != null) {
             try {
-                int color = Integer.parseInt(props.getValue());
-                return color;
+                return Integer.parseInt(props.getValue());
             }
             catch (NumberFormatException e) {
                 Log.e(TAG, "Не распарсено значение " + props.getValue());

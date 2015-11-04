@@ -1,11 +1,7 @@
 package projects.my.timerdb.models;
 
-import android.graphics.Color;
-
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-
-import projects.my.timerdb.dao.GenericDao;
 
 /**
  * Модель основных свойств приложения.

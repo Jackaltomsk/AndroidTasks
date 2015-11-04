@@ -43,7 +43,7 @@ public interface FragmentTimeManager {
      * Реализует получение флага работы.
      * @return Флаг работы.
      */
-    boolean getIsRunning();
+    boolean isRunning();
 
     /**
      * Реализует получение текущих установок времени. Актуально для таймера.

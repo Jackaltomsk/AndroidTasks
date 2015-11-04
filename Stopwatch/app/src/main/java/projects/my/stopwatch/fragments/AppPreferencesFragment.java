@@ -12,10 +12,6 @@ import android.widget.Toast;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.activities.ColorActivity;
-import projects.my.timerdb.dao.GenericDao;
-import projects.my.timerdb.dao.extensions.PropertiesExtension;
-import projects.my.timerdb.infrastructure.DbManager;
-import projects.my.timerdb.models.Properties;
 
 /**
  * Фрагмент настроек.

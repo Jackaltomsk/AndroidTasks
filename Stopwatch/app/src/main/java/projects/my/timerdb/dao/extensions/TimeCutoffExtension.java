@@ -2,8 +2,6 @@ package projects.my.timerdb.dao.extensions;
 
 import android.util.Log;
 
-import com.j256.ormlite.support.ConnectionSource;
-
 import java.sql.SQLException;
 import java.util.List;
 

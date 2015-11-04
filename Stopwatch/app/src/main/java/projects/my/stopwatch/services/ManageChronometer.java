@@ -29,7 +29,7 @@ public interface ManageChronometer extends ChronoTimerManager {
      * Реализует получение текущего статуса хронометра.
      * @return Возвращает флаг работы хронометра.
      */
-    boolean getIsChronometerRunning();
+    boolean isChronometerRunning();
 
     /**
      * Реализует получение текущего времени хронометра.

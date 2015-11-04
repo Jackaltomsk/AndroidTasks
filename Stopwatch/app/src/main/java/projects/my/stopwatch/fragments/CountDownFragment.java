@@ -28,8 +28,7 @@ public class CountDownFragment extends Fragment
     private TextView timerTime;
 
     public static CountDownFragment newInstance() {
-        CountDownFragment fragment = new CountDownFragment();
-        return fragment;
+        return new CountDownFragment();
     }
 
     @Override
@@ -59,7 +58,7 @@ public class CountDownFragment extends Fragment
     @Override
     public void start() {
         if (service != null) {
-            if (!service.getIsTimerRunning()) {
+            if (!service.isTimerRunning()) {
                 long seconds = Time.milsToSeconds(getTimeSet());
 
                 service.startTimer(seconds);
@@ -113,9 +112,8 @@ public class CountDownFragment extends Fragment
     }
 
     @Override
-    public boolean getIsRunning() {
-        if (service != null) return service.getIsTimerRunning();
-        else return false;
+    public boolean isRunning() {
+        return service != null && service.isTimerRunning();
     }
 
     @Override

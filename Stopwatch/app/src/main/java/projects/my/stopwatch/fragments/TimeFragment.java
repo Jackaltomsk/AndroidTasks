@@ -25,8 +25,7 @@ public class TimeFragment extends Fragment
     private TextView chronometerTime;
 
     public static TimeFragment newInstance() {
-        TimeFragment fragment = new TimeFragment();
-        return fragment;
+        return new TimeFragment();
     }
 
     @Override
@@ -56,7 +55,7 @@ public class TimeFragment extends Fragment
     @Override
     public void start() {
         if (service != null) {
-            if (!service.getIsChronometerRunning()) {
+            if (!service.isChronometerRunning()) {
                 service.startChronometer();
             }
         }
@@ -110,9 +109,8 @@ public class TimeFragment extends Fragment
     }
 
     @Override
-    public boolean getIsRunning() {
-        if (service != null) return service.getIsChronometerRunning();
-        else return false;
+    public boolean isRunning() {
+        return service != null && service.isChronometerRunning();
     }
 
     @Override

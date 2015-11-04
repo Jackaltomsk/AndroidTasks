@@ -69,7 +69,7 @@ public class ChronoService extends Service
     }
 
     @Override
-    public boolean getIsChronometerRunning() {
+    public boolean isChronometerRunning() {
         return isChronometerRunning;
     }
 
@@ -112,7 +112,7 @@ public class ChronoService extends Service
     }
 
     @Override
-    public boolean getIsTimerRunning() {
+    public boolean isTimerRunning() {
         return isTimerRunning;
     }
 
@@ -223,10 +223,12 @@ public class ChronoService extends Service
                 .setContentTitle(callerName)
                 .setContentText(Time.formatElapsedTime(currentTime))
                 .build();
-        ntf.flags |= Notification.FLAG_NO_CLEAR;
         if (isFinal) {
             ntf.defaults |= Notification.DEFAULT_VIBRATE;
             ntf.defaults |= Notification.DEFAULT_SOUND;
+        }
+        else {
+            ntf.flags |= Notification.FLAG_NO_CLEAR;
         }
         ntfManager.notify(ntfId, ntf);
     }
