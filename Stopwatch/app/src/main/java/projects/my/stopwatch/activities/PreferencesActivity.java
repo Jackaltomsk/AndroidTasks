@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 
 import projects.my.stopwatch.R;
-import projects.my.stopwatch.fragments.PreferencesFragment;
+import projects.my.stopwatch.fragments.AppPreferencesFragment;
 
 public class PreferencesActivity extends AppCompatActivity {
 
@@ -15,7 +15,7 @@ public class PreferencesActivity extends AppCompatActivity {
         setContentView(R.layout.activity_preferences);
         setToolbar();
         getFragmentManager().beginTransaction().replace(R.id.pref_content,
-                new PreferencesFragment()).commit();
+                new AppPreferencesFragment()).commit();
     }
 
     /**

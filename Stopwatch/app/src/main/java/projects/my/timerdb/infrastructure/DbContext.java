@@ -64,10 +64,10 @@ public class DbContext extends OrmLiteSqliteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, ConnectionSource connectionSource, int oldVer,
                           int newVer){
         try{
-            // Самое простое решение.
-            TableUtils.dropTable(connectionSource, Properties.class, true);
-            TableUtils.dropTable(connectionSource, TimeManager.class, true);
-            TableUtils.dropTable(connectionSource, TimeCutoff.class, true);
+            // Никогда не выполняющийся код-заглушка для компиляции. В противном случае пришлось
+            // бы комментировать сами блоки try-catch.
+            if (false) throw new SQLException();
+            // В данный момент версия БД не итерировалась, ничего обновлять не нужно.
             onCreate(db, connectionSource);
         }
         catch (SQLException e) {

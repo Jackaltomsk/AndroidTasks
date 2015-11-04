@@ -2,14 +2,13 @@ package projects.my.stopwatch.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
-import android.util.Log;
 import android.widget.Toast;
-
-import java.sql.SQLException;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.activities.ColorActivity;
@@ -21,9 +20,9 @@ import projects.my.timerdb.models.Properties;
 /**
  * Фрагмент настроек.
  */
-public class PreferencesFragment extends PreferenceFragment {
+public class AppPreferencesFragment extends PreferenceFragment {
 
-    private static final String TAG = PreferencesFragment.class.getSimpleName();
+    private static final String TAG = AppPreferencesFragment.class.getSimpleName();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -47,10 +46,9 @@ public class PreferencesFragment extends PreferenceFragment {
         if (requestCode == ColorActivity.REQUEST_COLOR_CODE) {
             if (resultCode == Activity.RESULT_OK) {
                 int colorId = data.getIntExtra(ColorActivity.COLOR, android.R.color.white);
-                GenericDao<Properties> dao = DbManager.getDbContext()
-                        .getGenericDao(Properties.class);
-                PropertiesExtension ext = new PropertiesExtension(dao);
-                ext.setNewColor(colorId);
+                SharedPreferences prefs = PreferenceManager
+                        .getDefaultSharedPreferences(getActivity().getApplicationContext());
+                prefs.edit().putInt(ColorActivity.COLOR, colorId).apply();
             }
             if (resultCode == Activity.RESULT_CANCELED) {
                 Toast tst = Toast.makeText(getActivity(), "Request cancelled", Toast.LENGTH_SHORT);

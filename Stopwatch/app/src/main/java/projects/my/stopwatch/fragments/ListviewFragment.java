@@ -36,7 +36,7 @@ public class ListviewFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.listview_fragment, container, false);
+        View view = inflater.inflate(R.layout.fragment_listview, container, false);
         Button addItem = (Button) view.findViewById(R.id.button_add_time);
         addItem.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,7 +81,7 @@ public class ListviewFragment extends Fragment {
         if (savedInstanceState == null) listItems = new ArrayList<>();
         else listItems = savedInstanceState.getStringArrayList(TIME_LIST);
 
-        adapter = new ArrayAdapter<>(getActivity(), R.layout.listview_item,
+        adapter = new ArrayAdapter<>(getActivity(), R.layout.item_listview,
                 R.id.textItem, listItems);
         list.setAdapter(adapter);
     }

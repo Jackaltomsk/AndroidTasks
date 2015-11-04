@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -33,14 +32,14 @@ public class SavedTimersFragment extends DialogFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        adapter = new ArrayAdapter<>(getActivity(), R.layout.listview_item,
+        adapter = new ArrayAdapter<>(getActivity(), R.layout.item_listview,
                 R.id.textItem, listItems);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.saved_timers_fragment, container);
+        View view = inflater.inflate(R.layout.fragment_saved_timers, container);
         list = (ListView) view.findViewById(R.id.time_listView);
         createListAdapter(savedInstanceState);
         Dialog dialog = getDialog();
@@ -59,18 +58,12 @@ public class SavedTimersFragment extends DialogFragment {
     public void setAdapterContents(Collection<String> values) {
         listItems.clear();
         listItems.addAll(values);
-
-        //adapter.clear();
-        //adapter.addAll(values);
     }
 
     private void createListAdapter(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             setAdapterContents(savedInstanceState.getStringArrayList(TIME_LIST));
         }
-
-        /*adapter = new ArrayAdapter<>(getActivity(), R.layout.listview_item,
-                R.id.textItem, listItems);*/
         list.setAdapter(adapter);
     }
 }

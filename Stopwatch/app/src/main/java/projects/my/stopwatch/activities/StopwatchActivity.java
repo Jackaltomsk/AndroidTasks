@@ -101,6 +101,12 @@ public class StopwatchActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        initBackground(null);
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         if (bound) {
@@ -110,8 +116,6 @@ public class StopwatchActivity extends AppCompatActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        boolean isFirstInit = startStopItem == null;
-
         getMenuInflater().inflate(R.menu.menu_stopwatch, menu);
         startStopItem = menu.findItem(R.id.start_counter);
         saveTimerItem = menu.findItem(R.id.save_timer_set);
@@ -120,7 +124,7 @@ public class StopwatchActivity extends AppCompatActivity
 
         // Предотвращение повторного вызова метода при установке во фрагментах
         // setHasOptionsMenu(true).
-        if (isFirstInit) {
+        if (startStopItem == null) {
             if (chronoService != null && currentFragment != null) {
                 stateChanged(currentFragment.getIsRunning());
             }
@@ -329,15 +333,16 @@ public class StopwatchActivity extends AppCompatActivity
             backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
         }
         else {
-            // Определим, брать ли цвет стандартный цвет фона или обращаться за ним к БД.
+            // Определим, брать ли стандартный цвет фона или обращаться за ним к настройкам.
             Integer color = null;
             SharedPreferences prefs = PreferenceManager
                     .getDefaultSharedPreferences(getApplicationContext());
             if (prefs.getBoolean(getResources().getString(R.string.pref_key_save_color), false)) {
-                GenericDao<Properties> propsDao = DbManager.getDbContext()
-                        .getGenericDao(Properties.class);
-                PropertiesExtension ext = new PropertiesExtension(propsDao);
-                color = ext.getColor();
+                if (prefs.contains(ColorActivity.COLOR)) {
+                    color = prefs.getInt(ColorActivity.COLOR, 0xFFFFFF);
+                    // Если цвет не менялся, нет смысла продолжать.
+                    if (color == backgroundColor) return;
+                }
             }
             if (color == null) {
                 TypedArray typedArray = getTheme().
@@ -347,9 +352,7 @@ public class StopwatchActivity extends AppCompatActivity
             }
             else backgroundColor = color;
         }
-
-        View mainContainer = findViewById(R.id.stopwatch_main_container);
-        mainContainer.setBackground(new ColorDrawable(backgroundColor));
+        handleBackgroundColorChange(new ColorDrawable(backgroundColor));
     }
 
     /**
