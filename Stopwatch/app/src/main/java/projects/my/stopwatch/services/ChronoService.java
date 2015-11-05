@@ -144,15 +144,15 @@ public class ChronoService extends Service
             @Override
             public void onTick(long millisUntilFinished) {
                 if (isCountUp) {
+                    chronoTime += Time.ONE_SECOND;
                     if (chronoTickListener != null) {
-                        chronoTime += Time.ONE_SECOND;
                         chronoTickListener.onTick(chronoTime);
                     }
                     sendNotification(chronoTime, chronoTitle, false);
                 }
                 else {
+                    timerTime += Time.ONE_SECOND;
                     if (timerTickListener != null) {
-                        timerTime += Time.ONE_SECOND;
                         timerTickListener.onTick(defaultTime - timerTime);
                     }
                     sendNotification(defaultTime - timerTime, timerTitle, false);
@@ -161,7 +161,7 @@ public class ChronoService extends Service
 
             @Override
             public void onFinish() {
-                timerTickListener.onFinish();
+                if (timerTickListener != null) timerTickListener.onFinish();
                 sendNotification(0, getResources().getString(R.string.timer_on_finish_title), true);
                 stopTimer();
                 timerTime = 0;
