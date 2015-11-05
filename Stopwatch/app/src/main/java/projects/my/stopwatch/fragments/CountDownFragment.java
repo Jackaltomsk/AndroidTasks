@@ -105,6 +105,7 @@ public class CountDownFragment extends Fragment
             @Override
             public void onFinish() {
                 if (timerTime != null) timerTime.setText(getResources().getText(R.string.empty_time));
+                ((ChangeState) getActivity()).stateChanged(false);
             }
         });
         if (timerTime != null) {

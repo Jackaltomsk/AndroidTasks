@@ -35,6 +35,7 @@ import projects.my.stopwatch.fragments.CountDownFragment;
 import projects.my.stopwatch.fragments.FragmentTimeManager;
 import projects.my.stopwatch.fragments.ListviewFragment;
 import projects.my.stopwatch.fragments.SavedTimersFragment;
+import projects.my.stopwatch.fragments.ChangeState;
 import projects.my.stopwatch.services.ChronoService;
 import projects.my.stopwatch.services.ChronoTimerManager;
 import projects.my.timerdb.dao.GenericDao;
@@ -44,7 +45,7 @@ import projects.my.timerdb.models.TimeCutoff;
 import projects.my.timerdb.models.TimeManager;
 
 public class StopwatchActivity extends AppCompatActivity
-        implements ListviewFragment.OnListActionListener {
+        implements ListviewFragment.OnListActionListener, ChangeState {
 
     private static final String TAG = StopwatchActivity.class.getSimpleName();
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
@@ -91,6 +92,17 @@ public class StopwatchActivity extends AppCompatActivity
         ActivityUtils.setToolbar(this, false);
         createServiceBinding();
         initBackground(savedInstanceState);
+    }
+
+    /**
+     * Реализует смену названия пункта меню при старте/остановке хронометра.
+     */
+    @Override
+    public void stateChanged(boolean isRunning) {
+        if (startStopItem != null) {
+            startStopItem.setTitle(isRunning ? R.string.menu_stop_counter_title :
+                    R.string.menu_start_counter_title);
+        }
     }
 
     @Override
@@ -299,16 +311,6 @@ public class StopwatchActivity extends AppCompatActivity
             }
         }
         else super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    /**
-     * Реализует смену названия пункта меню при старте/остановке хронометра.
-     */
-    private void stateChanged(boolean isRunning) {
-        if (startStopItem != null) {
-            startStopItem.setTitle(isRunning ? R.string.menu_stop_counter_title :
-                    R.string.menu_start_counter_title);
-        }
     }
 
     /**
