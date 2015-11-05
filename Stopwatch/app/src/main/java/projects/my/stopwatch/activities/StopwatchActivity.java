@@ -16,7 +16,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,6 +29,7 @@ import java.util.List;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.adapters.StopwatchPagerAdapter;
+import projects.my.stopwatch.common.ActivityUtils;
 import projects.my.stopwatch.common.Time;
 import projects.my.stopwatch.fragments.CountDownFragment;
 import projects.my.stopwatch.fragments.FragmentTimeManager;
@@ -88,7 +88,7 @@ public class StopwatchActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stopwatch);
         initViewPager();
-        setToolbar();
+        ActivityUtils.setToolbar(this, false);
         createServiceBinding();
         initBackground(savedInstanceState);
     }
@@ -207,14 +207,6 @@ public class StopwatchActivity extends AppCompatActivity
             public void onPageScrollStateChanged(int state) {
             }
         });
-    }
-
-    /**
-     * Реализует инициализацию тулбара.
-     */
-    private void setToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
     }
 
     /**

@@ -17,10 +17,12 @@
         </activity>
         <activity
             android:name=".activities.ColorActivity"
-            android:label="@string/title_activity_settings" />
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".activities.StopwatchActivity" />
         <activity
             android:name=".activities.PreferencesActivity"
-            android:label="@string/title_activitiy_preferences" />
+            android:label="@string/title_activitiy_preferences"
+            android:parentActivityName=".activities.StopwatchActivity" />
         <service
             android:name=".services.ChronoService"
             android:enabled="true"

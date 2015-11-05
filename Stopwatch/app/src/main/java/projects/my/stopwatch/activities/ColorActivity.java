@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.GridLayout;
@@ -13,6 +12,7 @@ import android.widget.GridLayout;
 import java.util.Random;
 
 import projects.my.stopwatch.R;
+import projects.my.stopwatch.common.ActivityUtils;
 
 public class ColorActivity extends AppCompatActivity {
 
@@ -23,7 +23,7 @@ public class ColorActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_color);
-        setToolbar();
+        ActivityUtils.setToolbar(this, true);
         fillGridWithColors();
     }
 
@@ -63,13 +63,5 @@ public class ColorActivity extends AppCompatActivity {
             view.setBackgroundColor(color);
             grid.addView(view);
         }
-    }
-
-    /**
-     * Реализует инициализацию тулбара.
-     */
-    private void setToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
     }
 }
