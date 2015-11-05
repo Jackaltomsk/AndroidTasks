@@ -41,10 +41,7 @@ public class AppPreferencesFragment extends PreferenceFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ColorActivity.REQUEST_COLOR_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                int colorId = data.getIntExtra(ColorActivity.COLOR, android.R.color.white);
-                SharedPreferences prefs = PreferenceManager
-                        .getDefaultSharedPreferences(getActivity().getApplicationContext());
-                prefs.edit().putInt(ColorActivity.COLOR, colorId).apply();
+                ColorActivity.setColorPreference(getActivity().getApplicationContext(), data);
             }
             if (resultCode == Activity.RESULT_CANCELED) {
                 Toast tst = Toast.makeText(getActivity(), "Request cancelled", Toast.LENGTH_SHORT);

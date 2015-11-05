@@ -302,7 +302,7 @@ public class StopwatchActivity extends AppCompatActivity
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == ColorActivity.REQUEST_COLOR_CODE) {
             if (resultCode == Activity.RESULT_OK) {
-                int colorId = data.getIntExtra(ColorActivity.COLOR, android.R.color.white);
+                int colorId = ColorActivity.setColorPreference(getApplicationContext(), data);
                 handleBackgroundColorChange(new ColorDrawable(colorId));
             }
             if (resultCode == Activity.RESULT_CANCELED) {

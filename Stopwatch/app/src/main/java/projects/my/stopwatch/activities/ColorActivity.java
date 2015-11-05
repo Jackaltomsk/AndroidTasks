@@ -1,8 +1,12 @@
 package projects.my.stopwatch.activities;
 
+import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -25,6 +29,20 @@ public class ColorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_color);
         ActivityUtils.setToolbar(this, true);
         fillGridWithColors();
+    }
+
+    /**
+     * Реализует сохранение выбранного цвета в настройки приложения.
+     * @param context Контекст приложения.
+     * @param data Интент с информацией о цвете.
+     * @return Возвращает цвет.
+     */
+    public static int setColorPreference(Context context, Intent data) {
+        int colorId = data.getIntExtra(ColorActivity.COLOR, android.R.color.white);
+        SharedPreferences prefs = PreferenceManager
+                .getDefaultSharedPreferences(context);
+        prefs.edit().putInt(ColorActivity.COLOR, colorId).apply();
+        return colorId;
     }
 
     /**
