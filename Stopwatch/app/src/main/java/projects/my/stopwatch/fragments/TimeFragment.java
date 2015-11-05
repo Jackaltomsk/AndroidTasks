@@ -38,6 +38,9 @@ public class TimeFragment extends Fragment
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_time, container, false);
         chronometerTime = (TextView) view.findViewById(R.id.chronometer_time);
+        if (service != null) {
+            chronometerTime.setText(Time.formatElapsedTime(service.getChronoElapsed()));
+        }
         return view;
     }
 
@@ -49,7 +52,10 @@ public class TimeFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (service != null) service.setChronoTickListener(null);
+        if (service != null) {
+            service.setChronoTickListener(null);
+            service = null;
+        }
     }
 
     @Override

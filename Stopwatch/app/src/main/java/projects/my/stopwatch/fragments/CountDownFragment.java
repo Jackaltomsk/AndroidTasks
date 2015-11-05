@@ -41,6 +41,9 @@ public class CountDownFragment extends Fragment
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_countdown, container, false);
         timerTime = (TextView) view.findViewById(R.id.countdown_time);
+        if (service != null) {
+            timerTime.setText(Time.formatElapsedTime(service.getTimerElapsed()));
+        }
         return view;
     }
 
@@ -52,7 +55,10 @@ public class CountDownFragment extends Fragment
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (service != null) service.setTimerTickListener(null);
+        if (service != null) {
+            service.setTimerTickListener(null);
+            service = null;
+        }
     }
 
     @Override
