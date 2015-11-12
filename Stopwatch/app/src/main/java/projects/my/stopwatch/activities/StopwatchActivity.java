@@ -50,6 +50,7 @@ public class StopwatchActivity extends AppCompatActivity
     private static final String TAG = StopwatchActivity.class.getSimpleName();
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private boolean bound;
+    private boolean isAppCreating = true;
     private int backgroundColor;
     private FragmentTimeManager currentFragment;
     private ServiceConnection chronoConnection;
@@ -91,7 +92,7 @@ public class StopwatchActivity extends AppCompatActivity
         initViewPager();
         ActivityUtils.setToolbar(this, false);
         createServiceBinding();
-        initBackground(savedInstanceState);
+        initBackground(savedInstanceState, false);
     }
 
     /**
@@ -113,7 +114,8 @@ public class StopwatchActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        initBackground(null);
+        initBackground(null, !isAppCreating);
+        isAppCreating = false;
     }
 
     @Override
@@ -316,17 +318,19 @@ public class StopwatchActivity extends AppCompatActivity
     /**
      * Реализует инициализацию цвета бэкграунда активити.
      * @param savedInstanceState
+     * @param isResume Флаг того, что выполнение приложения продолжается.
      */
-    private void initBackground(Bundle savedInstanceState) {
+    private void initBackground(Bundle savedInstanceState, boolean isResume) {
         if (savedInstanceState != null) {
             backgroundColor = savedInstanceState.getInt(BACKGROUND_COLOR);
         }
         else {
+            // Здесь варианта два: либо это первый запуск, либо продолжение работы.
             // Определим, брать ли стандартный цвет фона или обращаться за ним к настройкам.
             Integer color = null;
             SharedPreferences prefs = PreferenceManager
                     .getDefaultSharedPreferences(getApplicationContext());
-            if (prefs.getBoolean(getResources().getString(R.string.pref_key_save_color), false)) {
+            if (isResume || prefs.getBoolean(getResources().getString(R.string.pref_key_save_color), false)) {
                 if (prefs.contains(ColorActivity.COLOR)) {
                     color = prefs.getInt(ColorActivity.COLOR, 0xFFFFFF);
                     // Если цвет не менялся, нет смысла продолжать.

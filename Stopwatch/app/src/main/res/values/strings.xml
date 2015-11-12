@@ -24,7 +24,7 @@
     <string name="pref_save_time_title">Сохранять отсечки таймера</string>
     <string name="pref_save_color_title">Применить цвет</string>
     <string name="pref_save_color_title_sum">Применять выбранный цвет фона при запуске
-        приложения(требуется перезапуск)</string>
+        приложения</string>
     <string name="pref_select_color_title">Выбрать цвет</string>
     <string name="pref_key_save_time">key_savetime</string>
     <string name="pref_key_save_color">key_savecolor</string>
