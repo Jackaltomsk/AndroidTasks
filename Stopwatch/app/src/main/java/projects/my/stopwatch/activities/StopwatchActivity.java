@@ -49,9 +49,11 @@ public class StopwatchActivity extends AppCompatActivity
 
     private static final String TAG = StopwatchActivity.class.getSimpleName();
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
+    private static final String CURRENT_FRAGMENT_POS = "CURRENT_FRAGMENT_POS";
     private boolean bound;
     private boolean isAppCreating;
     private int backgroundColor;
+    private int currentFragmentPos;
     private FragmentTimeManager currentFragment;
     private ServiceConnection chronoConnection;
     private ChronoService chronoService;
@@ -83,6 +85,10 @@ public class StopwatchActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null) {
+            currentFragmentPos = savedInstanceState.getInt(CURRENT_FRAGMENT_POS);
+        }
+
         // Создаем контекст единожды и для всего приложения.
         // Уничтожать его явно смысла нет - учечка памяти ничтожна и будет ликвидирована
         // по закрытии приложения.
@@ -116,6 +122,8 @@ public class StopwatchActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         initBackground(null, !isAppCreating);
+        pager.setCurrentItem(currentFragmentPos);
+        updateCurrentFragment(currentFragmentPos);
         isAppCreating = false;
     }
 
@@ -135,14 +143,12 @@ public class StopwatchActivity extends AppCompatActivity
         showTimerItem = menu.findItem(R.id.show_timer_sets);
         super.onCreateOptionsMenu(menu);
 
+        if (chronoService != null && currentFragment != null) {
+            stateChanged(currentFragment.isRunning());
+        }
         // Предотвращение повторного вызова метода при установке во фрагментах
         // setHasOptionsMenu(true).
-        if (startStopItem == null) {
-            if (chronoService != null && currentFragment != null) {
-                stateChanged(currentFragment.isRunning());
-            }
-            setupTabs();
-        }
+        if (startStopItem == null) setupTabs();
         return true;
     }
 
@@ -150,6 +156,7 @@ public class StopwatchActivity extends AppCompatActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(BACKGROUND_COLOR, backgroundColor);
+        outState.putInt(CURRENT_FRAGMENT_POS, currentFragmentPos);
     }
 
     /**
@@ -182,6 +189,7 @@ public class StopwatchActivity extends AppCompatActivity
      * @param position Позиция фрагмента в пейджере.
      */
     private void updateCurrentFragment(int position) {
+        currentFragmentPos = position;
         currentFragment = (FragmentTimeManager) pageAdapter.getItem(position);
         if (saveTimerItem != null) {
             saveTimerItem.setVisible(currentFragment instanceof CountDownFragment);
@@ -204,7 +212,7 @@ public class StopwatchActivity extends AppCompatActivity
         for (int i = 0; i < fragments.length; i++) {
             pageAdapter.instantiateItem(pager, i);
         }
-        currentFragment = (FragmentTimeManager) pageAdapter.getItem(0);
+        //currentFragment = (FragmentTimeManager) pageAdapter.getItem(0);
 
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -297,8 +305,8 @@ public class StopwatchActivity extends AppCompatActivity
                 break;
             }
             case R.id.background_img: {
-                Intent prefIntent = new Intent(this, BackgroundImgActivity_.class);
-                startActivity(prefIntent);
+                Intent bckgIntent = new Intent(this, BackgroundImgActivity_.class);
+                startActivity(bckgIntent);
                 break;
             }
             default: return super.onOptionsItemSelected(item);

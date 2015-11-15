@@ -59,6 +59,12 @@ public class TimeFragment extends Fragment
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        //((ChangeState) getActivity()).stateChanged(isRunning());
+    }
+
+    @Override
     public void start() {
         if (service != null) {
             if (!service.isChronometerRunning()) {
