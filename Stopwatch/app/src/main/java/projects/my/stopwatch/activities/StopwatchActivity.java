@@ -50,7 +50,7 @@ public class StopwatchActivity extends AppCompatActivity
     private static final String TAG = StopwatchActivity.class.getSimpleName();
     private static final String BACKGROUND_COLOR = "BACKGROUND_COLOR";
     private boolean bound;
-    private boolean isAppCreating = true;
+    private boolean isAppCreating;
     private int backgroundColor;
     private FragmentTimeManager currentFragment;
     private ServiceConnection chronoConnection;
@@ -82,12 +82,13 @@ public class StopwatchActivity extends AppCompatActivity
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         // Создаем контекст единожды и для всего приложения.
         // Уничтожать его явно смысла нет - учечка памяти ничтожна и будет ликвидирована
         // по закрытии приложения.
         if (!DbManager.isContextSet()) DbManager.setDbContext(getApplicationContext());
+        isAppCreating = true;
 
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stopwatch);
         initViewPager();
         ActivityUtils.setToolbar(this, false);
@@ -295,6 +296,11 @@ public class StopwatchActivity extends AppCompatActivity
                 showSavedTimerDialog();
                 break;
             }
+            case R.id.background_img: {
+                Intent prefIntent = new Intent(this, BackgroundImgActivity_.class);
+                startActivity(prefIntent);
+                break;
+            }
             default: return super.onOptionsItemSelected(item);
         }
         return true;
@@ -318,7 +324,7 @@ public class StopwatchActivity extends AppCompatActivity
     /**
      * Реализует инициализацию цвета бэкграунда активити.
      * @param savedInstanceState
-     * @param isResume Флаг того, что выполнение приложения продолжается.
+     * @param isResume Флаг того, что выполнение приложения продолжается поста паузы/останова.
      */
     private void initBackground(Bundle savedInstanceState, boolean isResume) {
         if (savedInstanceState != null) {

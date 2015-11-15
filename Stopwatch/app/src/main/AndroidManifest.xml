@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="projects.my.stopwatch" >
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
         <activity
             android:name=".activities.StopwatchActivity"
             android:label="@string/app_name"
@@ -15,18 +17,40 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".activities.ColorActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName=".activities.StopwatchActivity" />
+            android:parentActivityName=".activities.StopwatchActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="projects.my.stopwatch.activities.StopwatchActivity" />
+        </activity>
+
         <activity
             android:name=".activities.PreferencesActivity"
             android:label="@string/title_activitiy_preferences"
-            android:parentActivityName=".activities.StopwatchActivity" />
+            android:parentActivityName=".activities.StopwatchActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="projects.my.stopwatch.activities.StopwatchActivity" />
+        </activity>
+
+        <activity
+            android:name=".activities.BackgroundImgActivity_"
+            android:label="@string/title_activity_background_img"
+            android:parentActivityName=".activities.StopwatchActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="projects.my.stopwatch.activities.StopwatchActivity" />
+        </activity>
+
         <service
             android:name=".services.ChronoService"
             android:enabled="true"
             android:exported="false" >
         </service>
+
     </application>
+
 </manifest>

@@ -3,21 +3,25 @@
     <string name="app_name">Stopwatch</string>
     <string name="title_activity_settings">SettingsActivity</string>
     <string name="title_activitiy_preferences">Preferences</string>
+    <string name="title_activity_background_img">BackgroundImgActivity</string>
 
-    <!--Остальное-->
+    <!--Пункты меню-->
+    <string name="preferences_action">Настройки</string>
+    <string name="chronometer_color_settings">Выбор цвета</string>
     <string name="menu_drop_counter_title">Сбросить</string>
     <string name="menu_start_counter_title">Запустить</string>
     <string name="menu_stop_counter_title">Остановить</string>
+    <string name="menu_show_background_img_list">Фоны</string>
+
+    <!--Остальное-->
     <string name="chronometer_notification_title">Chronometer</string>
+    <string name="save_timer_set">Сохранить время</string>
+    <string name="show_timer_sets">Показать сохраненное время</string>
     <string name="timer_notification_title">Timer</string>
-    <string name="chronometer_color_settings">Выбор цвета</string>
     <string name="add_time_button_title">Добавить время</string>
     <string name="empty_time">00:00</string>
     <string name="timer_on_finish_title">Done</string>
     <string name="label_for_input_time">Время таймера (в секундах):</string>
-    <string name="preferences_action">Настройки</string>
-    <string name="save_timer_set">Сохранить время</string>
-    <string name="show_timer_sets">Показать сохраненное время</string>
     <string name="saved_timer_dialog_title">Таймеры</string>
 
     <!-- Окно настроек-->

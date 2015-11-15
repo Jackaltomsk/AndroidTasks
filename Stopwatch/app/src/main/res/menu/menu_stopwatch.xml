@@ -13,4 +13,6 @@
         app:showAsAction="never" />
     <item android:id="@+id/settings" android:title="@string/chronometer_color_settings"
         app:showAsAction="never" />
+    <item android:id="@+id/background_img" android:title="@string/menu_show_background_img_list"
+        app:showAsAction="never" />
 </menu>
