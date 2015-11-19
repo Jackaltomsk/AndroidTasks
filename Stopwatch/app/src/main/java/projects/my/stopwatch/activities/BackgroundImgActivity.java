@@ -6,13 +6,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+import com.android.volley.toolbox.ImageLoader;
+
 import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.ViewById;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.adapters.BackgroundImgAdapter;
 import projects.my.stopwatch.common.ActivityUtils;
+import projects.my.stopwatch.volley.QueueHolder;
 
 @EActivity(R.layout.activity_background_img)
 public class BackgroundImgActivity extends AppCompatActivity {
@@ -23,6 +28,9 @@ public class BackgroundImgActivity extends AppCompatActivity {
     public RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
+
+    @Bean
+    QueueHolder queueHolder;
 
     @AfterViews
     public void init() {
