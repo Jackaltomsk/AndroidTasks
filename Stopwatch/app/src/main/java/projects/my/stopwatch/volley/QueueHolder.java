@@ -7,6 +7,7 @@ import android.support.v4.util.LruCache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.Volley;
 
 import org.androidannotations.annotations.EBean;
 
@@ -21,12 +22,10 @@ public class QueueHolder {
 
     QueueHolder(Context context) {
         ctx = context;
-        requestQueue = getRequestQueue();
+        requestQueue = Volley.newRequestQueue(ctx);
 
-        imageLoader = new ImageLoader(requestQueue,
-                new ImageLoader.ImageCache() {
-                    private final LruCache<String, Bitmap>
-                            cache = new LruCache<String, Bitmap>(20);
+        imageLoader = new ImageLoader(requestQueue, new ImageLoader.ImageCache() {
+                    private final LruCache<String, Bitmap> cache = new LruCache<>(20);
 
                     @Override
                     public Bitmap getBitmap(String url) {
@@ -40,7 +39,7 @@ public class QueueHolder {
                 });
     }
 
-    public RequestQueue getRequestQueue() {        
+    public RequestQueue getRequestQueue() {
         return requestQueue;
     }
 

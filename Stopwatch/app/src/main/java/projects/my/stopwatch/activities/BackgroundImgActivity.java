@@ -6,13 +6,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
-import com.android.volley.toolbox.ImageLoader;
-
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.EBean;
 import org.androidannotations.annotations.ViewById;
+
+import java.util.Arrays;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.adapters.BackgroundImgAdapter;
@@ -46,5 +45,6 @@ public class BackgroundImgActivity extends AppCompatActivity {
 
         // specify an adapter (see also next example)
         adapter = new BackgroundImgAdapter(new Bitmap[]{});
+        recyclerView.setAdapter(adapter);
     }
 }

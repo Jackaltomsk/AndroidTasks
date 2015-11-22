@@ -45,7 +45,7 @@ public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdap
     public void onBindViewHolder(ViewHolder holder, int position) {
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        //holder.imageView.setText(dataset[position]);
+        holder.imageView.setImageBitmap(dataset[position]);
     }
 
     // Return the size of your dataset (invoked by the layout manager)
