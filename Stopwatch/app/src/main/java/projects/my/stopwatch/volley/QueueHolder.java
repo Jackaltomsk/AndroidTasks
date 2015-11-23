@@ -24,7 +24,7 @@ public class QueueHolder {
         ctx = context;
         requestQueue = Volley.newRequestQueue(ctx);
 
-        imageLoader = new ImageLoader(requestQueue, new ImageLoader.ImageCache() {
+        imageLoader = new AuthImageLoader(requestQueue, new ImageLoader.ImageCache() {
                     private final LruCache<String, Bitmap> cache = new LruCache<>(20);
 
                     @Override
@@ -36,7 +36,7 @@ public class QueueHolder {
                     public void putBitmap(String url, Bitmap bitmap) {
                         cache.put(url, bitmap);
                     }
-                });
+                }, Constants.IMGUR_APP_ID);
     }
 
     public RequestQueue getRequestQueue() {
