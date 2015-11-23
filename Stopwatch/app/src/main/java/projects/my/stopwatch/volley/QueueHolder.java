@@ -23,6 +23,8 @@ public class QueueHolder {
     QueueHolder(Context context) {
         ctx = context;
         requestQueue = Volley.newRequestQueue(ctx);
+        requestQueue.start();
+        String credentials = Constants.CLIENT_ID + " " + Constants.IMGUR_APP_ID;
 
         imageLoader = new AuthImageLoader(requestQueue, new ImageLoader.ImageCache() {
                     private final LruCache<String, Bitmap> cache = new LruCache<>(20);
@@ -36,7 +38,7 @@ public class QueueHolder {
                     public void putBitmap(String url, Bitmap bitmap) {
                         cache.put(url, bitmap);
                     }
-                }, Constants.IMGUR_APP_ID);
+                }, credentials);
     }
 
     public RequestQueue getRequestQueue() {
