@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.google.gson.Gson;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.Bean;
@@ -21,7 +22,9 @@ import org.androidannotations.annotations.ViewById;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.adapters.BackgroundImgAdapter;
@@ -29,6 +32,8 @@ import projects.my.stopwatch.common.ActivityUtils;
 import projects.my.stopwatch.volley.AuthJsonRequest;
 import projects.my.stopwatch.volley.Constants;
 import projects.my.stopwatch.volley.QueueHolder;
+import projects.my.stopwatch.volley.imgur.models.GalleryImage;
+import projects.my.stopwatch.volley.imgur.models.ImgurResponse;
 
 @EActivity(R.layout.activity_background_img)
 public class BackgroundImgActivity extends AppCompatActivity {
@@ -57,7 +62,10 @@ public class BackgroundImgActivity extends AppCompatActivity {
         layoutManager = new GridLayoutManager(this, isPortrait ? PORT_SPAN : LAND_SPAN);
         recyclerView.setLayoutManager(layoutManager);
 
+        fetchImages();
+    }
 
+    private void fetchImages() {
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -67,23 +75,35 @@ public class BackgroundImgActivity extends AppCompatActivity {
             Toast.makeText(this, "Нет подключения к Internet", Toast.LENGTH_SHORT).show();
         }
         else {
-            queueHolder.addToRequestQueue(new AuthJsonRequest(Constants.UMGUR_BASE + "gallery.json",
+            queueHolder.addToRequestQueue(new AuthJsonRequest(Constants.UMGUR_BASE +
+                    Constants.UMGUR_GALLERY + 0 + Constants.JSON,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            JSONArray a = response.names();
+                            Gson gson = new Gson();
+                            ImgurResponse resp = gson.fromJson(response.toString(),
+                                    ImgurResponse.class);
+                            updateAdapter(resp);
                         }
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     String data = new String(error.networkResponse.data);
-                    Log.e(TAG, "Ошибка получения дпнных.");
+                    Log.e(TAG, "Ошибка получения данных.");
                 }
             }, Constants.CLIENT_ID + " " + Constants.IMGUR_APP_ID));
         }
+    }
 
+    private void updateAdapter(ImgurResponse resp) {
+        ArrayList<String> urls = new ArrayList<>(resp.getData().length);
+        for (GalleryImage img : resp.getData()) {
+            if (!img.is_album() && !img.isAnimated()) urls.add(img.getLink());
+        }
+
+        String[] arrUrls = new String[urls.size()];
         // specify an adapter (see also next example)
-        adapter = new BackgroundImgAdapter(new Bitmap[]{});
+        adapter = new BackgroundImgAdapter(urls.toArray(arrUrls), queueHolder.getImageLoader());
         recyclerView.setAdapter(adapter);
     }
 }

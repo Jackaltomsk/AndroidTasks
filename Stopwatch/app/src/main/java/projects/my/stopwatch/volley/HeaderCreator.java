@@ -19,7 +19,7 @@ public class HeaderCreator {
      */
     public void Add(String key, String value) {
         try {
-            headers.put(key + ":", value);
+            headers.put(key, value);
         }
         catch (NullPointerException ex) {
             Log.e(TAG, "Ошибка добавления хедера: " + ex);

@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ImageView
+<com.android.volley.toolbox.NetworkImageView
     android:id="@+id/recycler_element_img"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:paddingLeft="@dimen/element_margin_stopwatch"
-    android:paddingTop="@dimen/element_margin_stopwatch"
-    android:paddingRight="@dimen/element_margin_stopwatch"
-    android:paddingBottom="@dimen/element_margin_stopwatch"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:contentDescription="" />
+    android:layout_width="150dp"
+    android:layout_height="170dp"
+    android:layout_centerHorizontal="true"
+    xmlns:android="http://schemas.android.com/apk/res/android" />
