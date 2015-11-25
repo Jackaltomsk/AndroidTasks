@@ -16,8 +16,10 @@ import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 
 import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.InstanceState;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -41,6 +43,8 @@ public class BackgroundImgActivity extends AppCompatActivity {
 
     private static final int PORT_SPAN = 2;
     private static final int LAND_SPAN = 4;
+    @InstanceState
+    int currentPage;
 
     @ViewById(R.id.recycler_view_img)
     public RecyclerView recyclerView;
@@ -65,7 +69,8 @@ public class BackgroundImgActivity extends AppCompatActivity {
         fetchImages();
     }
 
-    private void fetchImages() {
+    @Background
+    void fetchImages() {
         ConnectivityManager cm =
                 (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -76,7 +81,7 @@ public class BackgroundImgActivity extends AppCompatActivity {
         }
         else {
             queueHolder.addToRequestQueue(new AuthJsonRequest(Constants.UMGUR_BASE +
-                    Constants.UMGUR_GALLERY + 0 + Constants.JSON,
+                    Constants.UMGUR_GALLERY + (currentPage++) + Constants.JSON,
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {

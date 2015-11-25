@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
-def AAVersion = '3.3.2'
 
 apt {
     arguments {
@@ -28,15 +27,18 @@ android {
     sourceSets { main { java.srcDirs = ['src/main/java'] } }
 }
 
+def AAVersion = '3.3.2'
+def supportVer = '23.1.1'
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     apt "org.androidannotations:androidannotations:$AAVersion"
     compile "org.androidannotations:androidannotations:$AAVersion"
     compile "org.androidannotations:androidannotations-api:$AAVersion"
-    compile 'com.android.support:support-v13:23.1.0'
-    compile 'com.android.support:appcompat-v7:23.1.0'
-    compile 'com.android.support:design:23.1.0'
-    compile 'com.android.support:recyclerview-v7:23.1.0'
+    compile "com.android.support:support-v13:$supportVer"
+    compile "com.android.support:appcompat-v7:$supportVer"
+    compile "com.android.support:design:$supportVer"
+    compile "com.android.support:recyclerview-v7:$supportVer"
     compile 'com.j256.ormlite:ormlite-android:4.48'
     compile 'com.j256.ormlite:ormlite-core:4.48'
     compile 'com.mcxiaoke.volley:library:1.0.19'
