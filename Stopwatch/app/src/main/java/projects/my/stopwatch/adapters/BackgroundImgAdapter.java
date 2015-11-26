@@ -77,12 +77,8 @@ public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdap
                     @Override
                     public void onResponse(ImageLoader.ImageContainer response,
                                            boolean isImmediate) {
-                        if (fg.isReady()) {
-                            fg.setImage(response.getBitmap());
-                        }
-                        else {
-                            fg.show(activity.getFragmentManager(), "fg");
-                        }
+                        if (!fg.isAdded()) fg.show(activity.getFragmentManager(), "fg");
+                        if (fg.isReady()) fg.setImage(response.getBitmap());
                     }
 
                     @Override

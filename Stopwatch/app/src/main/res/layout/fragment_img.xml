@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="wrap_content"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content">
     <ImageView
         android:id="@+id/fragment_bckg_img_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:padding="@dimen/button_text_padding"
         android:contentDescription="" />
     <Button
@@ -15,6 +15,10 @@
         android:background="@drawable/button_ripple"
         android:id="@+id/button_set_bckg_image"
         android:padding="@dimen/button_text_padding"
-        android:layout_margin="@dimen/element_margin_stopwatch"
-        android:layout_gravity="center"/>
-</LinearLayout>
+        android:layout_marginBottom="@dimen/element_margin_stopwatch"
+        android:layout_gravity="center"
+        android:layout_marginLeft="@dimen/element_margin_stopwatch"
+        android:layout_marginRight="@dimen/element_margin_stopwatch"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>
