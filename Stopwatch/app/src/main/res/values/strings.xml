@@ -23,6 +23,7 @@
     <string name="timer_on_finish_title">Done</string>
     <string name="label_for_input_time">Время таймера (в секундах):</string>
     <string name="saved_timer_dialog_title">Таймеры</string>
+    <string name="set_bckg_image_title">Установить изображение</string>
 
     <!-- Окно настроек-->
     <string name="pref_save_time_title">Сохранять отсечки таймера</string>

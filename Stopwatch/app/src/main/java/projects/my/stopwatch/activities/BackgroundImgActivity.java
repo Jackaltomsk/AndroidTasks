@@ -2,7 +2,6 @@ package projects.my.stopwatch.activities;
 
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
@@ -21,12 +20,9 @@ import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.InstanceState;
 import org.androidannotations.annotations.ViewById;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.adapters.BackgroundImgAdapter;
@@ -48,7 +44,9 @@ public class BackgroundImgActivity extends AppCompatActivity {
 
     @ViewById(R.id.recycler_view_img)
     public RecyclerView recyclerView;
-    private RecyclerView.Adapter adapter;
+
+    @Bean
+    BackgroundImgAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
     @Bean
@@ -85,30 +83,28 @@ public class BackgroundImgActivity extends AppCompatActivity {
                     new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
-                            Gson gson = new Gson();
-                            ImgurResponse resp = gson.fromJson(response.toString(),
+                            ImgurResponse resp = new Gson().fromJson(response.toString(),
                                     ImgurResponse.class);
                             updateAdapter(resp);
                         }
                     }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    String data = new String(error.networkResponse.data);
-                    Log.e(TAG, "Ошибка получения данных.");
+                    Log.e(TAG, "Ошибка получения данных: "+ new String(error.networkResponse.data));
                 }
             }, Constants.CLIENT_ID + " " + Constants.IMGUR_APP_ID));
         }
     }
 
     private void updateAdapter(ImgurResponse resp) {
-        ArrayList<String> urls = new ArrayList<>(resp.getData().length);
+        ArrayList<GalleryImage> images = new ArrayList<>(resp.getData().length);
         for (GalleryImage img : resp.getData()) {
-            if (!img.is_album() && !img.isAnimated()) urls.add(img.getLink());
+            if (!img.is_album() && !img.isAnimated()) images.add(img);
         }
 
-        String[] arrUrls = new String[urls.size()];
-        // specify an adapter (see also next example)
-        adapter = new BackgroundImgAdapter(urls.toArray(arrUrls), queueHolder.getImageLoader());
+        GalleryImage[] arrUrls = new GalleryImage[images.size()];
+        adapter.init(images.toArray(arrUrls), queueHolder.getImageLoader(), this);
+
         recyclerView.setAdapter(adapter);
     }
 }
