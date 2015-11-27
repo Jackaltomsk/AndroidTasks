@@ -64,47 +64,18 @@ public class BackgroundImgActivity extends AppCompatActivity {
         layoutManager = new GridLayoutManager(this, isPortrait ? PORT_SPAN : LAND_SPAN);
         recyclerView.setLayoutManager(layoutManager);
 
-        fetchImages();
-    }
-
-    @Background
-    void fetchImages() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager cm = (ConnectivityManager) queueHolder.getContext()
+                .getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = activeNetwork.isConnectedOrConnecting();
         if (!isConnected) {
-            Toast.makeText(this, "Нет подключения к Internet", Toast.LENGTH_SHORT).show();
+            Toast.makeText(queueHolder.getContext(), "Нет подключения к Internet",
+                    Toast.LENGTH_SHORT).show();
         }
         else {
-            queueHolder.addToRequestQueue(new AuthJsonRequest(Constants.UMGUR_BASE +
-                    Constants.UMGUR_GALLERY + (currentPage++) + Constants.JSON,
-                    new Response.Listener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject response) {
-                            ImgurResponse resp = new Gson().fromJson(response.toString(),
-                                    ImgurResponse.class);
-                            updateAdapter(resp);
-                        }
-                    }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    Log.e(TAG, "Ошибка получения данных: "+ new String(error.networkResponse.data));
-                }
-            }, Constants.CLIENT_ID + " " + Constants.IMGUR_APP_ID));
+            adapter.init(new GalleryImage[]{}, queueHolder.getImageLoader(), this);
+            recyclerView.setAdapter(adapter);
         }
-    }
-
-    private void updateAdapter(ImgurResponse resp) {
-        ArrayList<GalleryImage> images = new ArrayList<>(resp.getData().length);
-        for (GalleryImage img : resp.getData()) {
-            if (!img.is_album() && !img.isAnimated()) images.add(img);
-        }
-
-        GalleryImage[] arrUrls = new GalleryImage[images.size()];
-        adapter.init(images.toArray(arrUrls), queueHolder.getImageLoader(), this);
-
-        recyclerView.setAdapter(adapter);
     }
 }

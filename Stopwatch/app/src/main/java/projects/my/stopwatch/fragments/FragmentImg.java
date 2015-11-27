@@ -31,10 +31,6 @@ public class FragmentImg extends DialogFragment {
     }
 
     public void setImage(Bitmap img) {
-        imageView.setImageBitmap(img);
-    }
-
-    public boolean isReady() {
-        return imageView != null;
+        if (imageView != null) imageView.setImageBitmap(img);
     }
 }

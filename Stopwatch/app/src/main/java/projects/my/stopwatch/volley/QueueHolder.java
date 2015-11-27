@@ -18,7 +18,7 @@ import org.androidannotations.annotations.EBean;
 public class QueueHolder {
     private RequestQueue requestQueue;
     private ImageLoader imageLoader;
-    static Context ctx;
+    private Context ctx;
 
     QueueHolder(Context context) {
         ctx = context;
@@ -51,5 +51,9 @@ public class QueueHolder {
 
     public ImageLoader getImageLoader() {
         return imageLoader;
+    }
+
+    public Context getContext() {
+        return ctx;
     }
 }

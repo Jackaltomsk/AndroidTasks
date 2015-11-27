@@ -14,11 +14,14 @@ import com.android.volley.toolbox.NetworkImageView;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
 
+import java.util.ArrayList;
+
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.fragments.FragmentImg;
 import projects.my.stopwatch.fragments.FragmentImg_;
 import projects.my.stopwatch.volley.QueueHolder;
 import projects.my.stopwatch.volley.imgur.models.GalleryImage;
+import projects.my.stopwatch.volley.imgur.models.ImgurResponse;
 
 @EBean
 public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdapter.ViewHolder> {
@@ -78,7 +81,7 @@ public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdap
                     public void onResponse(ImageLoader.ImageContainer response,
                                            boolean isImmediate) {
                         if (!fg.isAdded()) fg.show(activity.getFragmentManager(), "fg");
-                        if (fg.isReady()) fg.setImage(response.getBitmap());
+                        fg.setImage(response.getBitmap());
                     }
 
                     @Override
@@ -94,5 +97,17 @@ public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdap
     @Override
     public int getItemCount() {
         return dataset.length;
+    }
+
+    private void updateAdapter(ImgurResponse resp) {
+        ArrayList<GalleryImage> images = new ArrayList<>(resp.getData().length);
+        for (GalleryImage img : resp.getData()) {
+            if (!img.is_album() && !img.isAnimated()) images.add(img);
+        }
+
+        GalleryImage[] arrUrls = new GalleryImage[images.size()];
+        //adapter.init(images.toArray(arrUrls), queueHolder.getImageLoader(), this);
+
+        //recyclerView.setAdapter(adapter);
     }
 }
