@@ -6,7 +6,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.google.gson.Gson;
 
-import org.androidannotations.annotations.Background;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
 import org.json.JSONObject;
@@ -29,6 +28,11 @@ public class Paginator {
     private int realPage; // на реальной странице переменное количество изображений
     private int uiPage; // для UI количество изображений на странице фиксировано
     private ArrayList<GalleryImage> images;
+    private ImgDatasetUpdated imgDatasetUpdatedListener;
+
+    public interface ImgDatasetUpdated {
+        void updateData();
+    }
 
     @Bean
     QueueHolder queueHolder;
@@ -37,21 +41,22 @@ public class Paginator {
         images = new ArrayList<>();
     }
 
-    @Background
-    void fetchImages() {
+    public void fetchImages() {
         queueHolder.addToRequestQueue(new AuthJsonRequest(Constants.UMGUR_BASE +
-                Constants.UMGUR_GALLERY + (realPage++) + Constants.JSON,
+                Constants.UMGUR_GALLERY + realPage + Constants.JSON,
                 new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         ImgurResponse resp = new Gson().fromJson(response.toString(),
                                 ImgurResponse.class);
                         // Вычищаем локальный кэш, если там что-то есть.
-                        if (images.size() > 0) images.clear();
                         for (GalleryImage img : resp.getData()) {
                             if (!img.is_album() && !img.isAnimated()) images.add(img);
                         }
-                        //updateAdapter(resp);
+                        realPage++;
+                        if (imgDatasetUpdatedListener != null) {
+                            imgDatasetUpdatedListener.updateData();
+                        }
                     }
                 }, new Response.ErrorListener() {
             @Override
@@ -61,7 +66,17 @@ public class Paginator {
         }, Constants.CLIENT_ID + " " + Constants.IMGUR_APP_ID));
     }
 
+    public void setImgDatasetUpdatedListener(ImgDatasetUpdated imgDatasetUpdatedListener) {
+        this.imgDatasetUpdatedListener = imgDatasetUpdatedListener;
+    }
+
     public GalleryImage[] getNextPage() {
-        throw new UnsupportedOperationException();
+        int lastValue = uiPage * ITEMS_PER_PAGE + ITEMS_PER_PAGE;
+        GalleryImage[] data = new GalleryImage[ITEMS_PER_PAGE];
+        for (int i = uiPage * ITEMS_PER_PAGE, j = 0; i < lastValue; i++, j++) {
+            data[j] = images.get(i);
+        }
+        uiPage++;
+        return data;
     }
 }

@@ -68,13 +68,13 @@ public class BackgroundImgActivity extends AppCompatActivity {
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        boolean isConnected = activeNetwork.isConnectedOrConnecting();
-        if (!isConnected) {
+        if (!activeNetwork.isConnectedOrConnecting()) {
             Toast.makeText(queueHolder.getContext(), "Нет подключения к Internet",
                     Toast.LENGTH_SHORT).show();
         }
         else {
-            adapter.init(new GalleryImage[]{}, queueHolder.getImageLoader(), this);
+            adapter.init(queueHolder.getImageLoader(), this);
+            recyclerView.addOnScrollListener(adapter.getViewScrollListener());
             recyclerView.setAdapter(adapter);
         }
     }

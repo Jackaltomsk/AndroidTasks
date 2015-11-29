@@ -14,26 +14,34 @@ import com.android.volley.toolbox.NetworkImageView;
 import org.androidannotations.annotations.Bean;
 import org.androidannotations.annotations.EBean;
 
-import java.util.ArrayList;
-
 import projects.my.stopwatch.R;
 import projects.my.stopwatch.fragments.FragmentImg;
 import projects.my.stopwatch.fragments.FragmentImg_;
 import projects.my.stopwatch.volley.QueueHolder;
+import projects.my.stopwatch.volley.imgur.common.Paginator;
 import projects.my.stopwatch.volley.imgur.models.GalleryImage;
-import projects.my.stopwatch.volley.imgur.models.ImgurResponse;
 
 @EBean
-public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdapter.ViewHolder> {
+public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdapter.ViewHolder>
+        implements Paginator.ImgDatasetUpdated {
     private static final String TAG = BackgroundImgAdapter.class.getSimpleName();
 
     private ImageLoader imageLoader;
     private GalleryImage[] dataset;
     private Activity activity;
+    private FragmentImg fragmentImg;
+    private RecyclerView.OnScrollListener viewScrollListener;
 
     @Bean
     QueueHolder queueHolder;
-    FragmentImg fg;
+    @Bean
+    Paginator paginator;
+
+    @Override
+    public void updateData() {
+        dataset = paginator.getNextPage();
+        this.notifyDataSetChanged();
+    }
 
     /**
      * Данные элемента списка.
@@ -52,13 +60,35 @@ public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdap
     }
 
     public BackgroundImgAdapter() {
-        fg = new FragmentImg_();
+        fragmentImg = new FragmentImg_();
+        dataset = new GalleryImage[]{};
     }
 
-    public void init(GalleryImage[] myDataset, ImageLoader imgLoader, Activity act) {
-        dataset = myDataset;
+    public void init(ImageLoader imgLoader, Activity act) {
         imageLoader = imgLoader;
         activity = act;
+        paginator.setImgDatasetUpdatedListener(this);
+        paginator.fetchImages();
+        viewScrollListener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                RecyclerView.LayoutManager lmgr = recyclerView.getLayoutManager();
+
+                if (dy > 0) //check for scroll down
+                {
+                    int visibleItemCount = lmgr.getChildCount();
+                    int totalItemCount = lmgr.getItemCount();
+
+                    if (visibleItemCount >= totalItemCount)
+                    {
+                        Log.v(TAG, "Достигнут конец страницы.");
+                        //Do pagination.. i.e. fetch new data
+                        paginator.getNextPage();
+                    }
+                }
+                //super.onScrolled(recyclerView, dx, dy);
+            }
+        };
     }
 
     @Override
@@ -80,8 +110,9 @@ public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdap
                     @Override
                     public void onResponse(ImageLoader.ImageContainer response,
                                            boolean isImmediate) {
-                        if (!fg.isAdded()) fg.show(activity.getFragmentManager(), "fg");
-                        fg.setImage(response.getBitmap());
+                        if (!fragmentImg.isAdded()) fragmentImg.show(activity.getFragmentManager(),
+                                "fg");
+                        fragmentImg.setImage(response.getBitmap());
                     }
 
                     @Override
@@ -99,15 +130,7 @@ public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdap
         return dataset.length;
     }
 
-    private void updateAdapter(ImgurResponse resp) {
-        ArrayList<GalleryImage> images = new ArrayList<>(resp.getData().length);
-        for (GalleryImage img : resp.getData()) {
-            if (!img.is_album() && !img.isAnimated()) images.add(img);
-        }
-
-        GalleryImage[] arrUrls = new GalleryImage[images.size()];
-        //adapter.init(images.toArray(arrUrls), queueHolder.getImageLoader(), this);
-
-        //recyclerView.setAdapter(adapter);
+    public RecyclerView.OnScrollListener getViewScrollListener() {
+        return viewScrollListener;
     }
 }
