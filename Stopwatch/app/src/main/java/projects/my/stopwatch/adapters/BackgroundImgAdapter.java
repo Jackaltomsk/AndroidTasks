@@ -1,11 +1,14 @@
 package projects.my.stopwatch.adapters;
 
 import android.app.Activity;
+import android.app.Dialog;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
@@ -38,9 +41,16 @@ public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdap
     Paginator paginator;
 
     @Override
-    public void updateData() {
-        dataset = paginator.getNextPage();
-        this.notifyDataSetChanged();
+    public void updateData(boolean isFirstPage) {
+        updateDataset(isFirstPage, true);
+    }
+
+    private void updateDataset(boolean isFirstPage, boolean getNext) {
+        GalleryImage[] data = getNext ? paginator.getNextPage() : paginator.getPrevPage();
+        if (data != null) dataset = data;
+
+        if (isFirstPage) this.notifyDataSetChanged();
+        else this.notifyItemRangeChanged(0, Paginator.ITEMS_PER_PAGE);
     }
 
     /**
@@ -72,21 +82,31 @@ public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdap
         viewScrollListener = new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                RecyclerView.LayoutManager lmgr = recyclerView.getLayoutManager();
-
+                GridLayoutManager lmgr = (GridLayoutManager) recyclerView.getLayoutManager();
                 if (dy > 0) //check for scroll down
                 {
-                    int visibleItemCount = lmgr.getChildCount();
-                    int totalItemCount = lmgr.getItemCount();
+                    int lastItemPos = lmgr.findLastCompletelyVisibleItemPosition();
+                    int itemCount = lmgr.getItemCount();
 
-                    if (visibleItemCount >= totalItemCount)
-                    {
+                    if (lastItemPos == (itemCount - 1)) {
                         Log.v(TAG, "Достигнут конец страницы.");
-                        //Do pagination.. i.e. fetch new data
-                        paginator.getNextPage();
+                        updateDataset(false, true);
+                        recyclerView.scrollToPosition(0);
+                        Toast.makeText(activity, "Страница " + paginator.getUiPage(),
+                                Toast.LENGTH_SHORT).show();
                     }
                 }
-                //super.onScrolled(recyclerView, dx, dy);
+                else if (dy < 0) {
+                    if (lmgr.findFirstCompletelyVisibleItemPosition() == 0) {
+                        Log.v(TAG, "Достигнуто начало страницы.");
+                        updateDataset(false, false);
+                        if (paginator.getUiPage() > 0) {
+                            recyclerView.scrollToPosition(Paginator.ITEMS_PER_PAGE - 1);
+                        }
+                        Toast.makeText(activity, "Страница " + paginator.getUiPage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         };
     }
@@ -110,8 +130,10 @@ public class BackgroundImgAdapter extends RecyclerView.Adapter<BackgroundImgAdap
                     @Override
                     public void onResponse(ImageLoader.ImageContainer response,
                                            boolean isImmediate) {
-                        if (!fragmentImg.isAdded()) fragmentImg.show(activity.getFragmentManager(),
-                                "fg");
+                        if (!fragmentImg.isAdded()) {
+                            fragmentImg.show(activity.getFragmentManager(),
+                                    "fg");
+                        }
                         fragmentImg.setImage(response.getBitmap());
                     }
 

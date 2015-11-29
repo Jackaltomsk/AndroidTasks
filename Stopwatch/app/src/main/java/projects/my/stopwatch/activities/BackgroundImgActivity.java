@@ -68,7 +68,7 @@ public class BackgroundImgActivity extends AppCompatActivity {
                 .getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-        if (!activeNetwork.isConnectedOrConnecting()) {
+        if (activeNetwork == null || !activeNetwork.isConnectedOrConnecting()) {
             Toast.makeText(queueHolder.getContext(), "Нет подключения к Internet",
                     Toast.LENGTH_SHORT).show();
         }

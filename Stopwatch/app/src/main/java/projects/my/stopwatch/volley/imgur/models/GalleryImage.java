@@ -36,4 +36,18 @@ public class GalleryImage {
         String thumbLink = splitted[0] + id + Constants.MEDIUM_THUMB_POSTFIX + splitted[1];
         return thumbLink;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        GalleryImage that = (GalleryImage) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }
